@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: weather-outfit-agent
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python web_server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: PORT
+        value: 10000
+      - key: ZHIPU_API_KEY
+        value: 88cada5e688149409c0804146761dc1b.RBFp01gPwFzSI5ZK

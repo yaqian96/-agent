@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能天气穿搭助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .location-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .current-location {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .location-icon {
+            font-size: 2em;
+        }
+        
+        .location-name {
+            font-size: 1.5em;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #667eea;
+        }
+        
+        .input-group button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .input-group button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .auto-locate-btn {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px 25px;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .auto-locate-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .weather-display {
+            display: none;
+        }
+        
+        .weather-display.active {
+            display: block;
+        }
+        
+        .current-weather {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .temp {
+            font-size: 4em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .temp sup {
+            font-size: 0.4em;
+        }
+        
+        .condition {
+            font-size: 1.5em;
+            color: #666;
+            margin: 10px 0;
+        }
+        
+        .weather-details {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-item {
+            text-align: center;
+        }
+        
+        .detail-label {
+            font-size: 0.9em;
+            color: #999;
+        }
+        
+        .detail-value {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .forecast {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .forecast-day {
+            background: #f8f9fa;
+            padding: 15px 10px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .forecast-day:hover {
+            transform: translateY(-5px);
+        }
+        
+        .forecast-date {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        
+        .forecast-icon {
+            font-size: 1.5em;
+            margin: 5px 0;
+        }
+        
+        .forecast-temp {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .outfit-recommendation {
+            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .outfit-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .outfit-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .outfit-item {
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .outfit-label {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        
+        .outfit-value {
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .tips {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 10px;
+        }
+        
+        .tip-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            color: #666;
+        }
+        
+        .chat-section {
+            margin-top: 20px;
+        }
+        
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .message {
+            padding: 12px 18px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.bot {
+            background: #f0f0f0;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+        
+        .chat-input button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        
+        .rich-message {
+            line-height: 1.6;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .image-card-content {
+            padding: 12px;
+        }
+        
+        .image-card-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        
+        .image-card-desc {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .image-card-price {
+            font-size: 0.9em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .cost-card {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 1px solid #ffd700;
+        }
+        
+        .cost-card-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cost-breakdown {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cost-label {
+            color: #666;
+        }
+        
+        .cost-value {
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .cost-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0 0;
+            margin-top: 8px;
+            border-top: 2px solid #ffd700;
+            font-size: 1.1em;
+        }
+        
+        .cost-total-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .cost-total-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .food-card {
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 1px solid #ff9999;
+        }
+        
+        .food-card-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .food-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .food-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #e74c3c;
+            border: 1px solid #ff9999;
+        }
+        
+        .plan-card-wrapper {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 2px solid #667eea;
+        }
+        
+        .plan-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .plan-content {
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        
+        .tourism-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .tourism-section.active {
+            display: block;
+        }
+        
+        .tourism-header {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .attraction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .attraction-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .attraction-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .attraction-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .attraction-info {
+            padding: 12px;
+        }
+        
+        .attraction-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        
+        .attraction-desc {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .attraction-price {
+            font-size: 0.9em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .itinerary-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 12px;
+        }
+        
+        .itinerary-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .itinerary-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed #999;
+        }
+        
+        .itinerary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .itinerary-time {
+            min-width: 80px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .itinerary-content {
+            flex: 1;
+            color: #333;
+        }
+        
+        .cost-summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+            border-radius: 12px;
+            border: 2px solid #ffd700;
+        }
+        
+        .cost-summary-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .cost-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        .cost-summary-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .cost-summary-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .cost-summary-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .cost-total-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .cost-total-amount {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .weather-note {
+            padding: 12px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #1976d2;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-msg {
+            text-align: center;
+            padding: 20px;
+            color: #e74c3c;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .temp {
+                font-size: 3em;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌤️ 智能天气穿搭助手</h1>
+            <p>告诉我你在哪个城市，我为你提供天气和穿搭建议</p>
+        </div>
+        
+        <div class="card">
+            <div class="location-section">
+                <div class="current-location">
+                    <span class="location-icon">📍</span>
+                    <span class="location-name" id="currentCity">未定位</span>
+                </div>
+                <button class="auto-locate-btn" onclick="autoLocate()">📍 自动获取当前位置</button>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="cityInput" placeholder="请输入城市名称，如：北京、上海、广州" onkeypress="handleKeyPress(event)">
+                <button onclick="getWeather()" id="searchBtn">获取建议</button>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>正在获取天气数据...</p>
+            </div>
+            
+            <div id="error" class="error-msg" style="display: none;"></div>
+            
+            <div class="weather-display" id="weatherDisplay">
+                <div class="current-weather">
+                    <div class="temp" id="temp">--<sup>°C</sup></div>
+                    <div class="condition" id="condition">--</div>
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <div class="detail-label">湿度</div>
+                            <div class="detail-value" id="humidity">--%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">风力</div>
+                            <div class="detail-value" id="wind">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">体感</div>
+                            <div class="detail-value" id="comfort">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="forecast" id="forecast"></div>
+                
+                <div class="outfit-recommendation">
+                    <div class="outfit-title">👔 今日穿搭建议</div>
+                    <div class="outfit-items" id="outfitItems"></div>
+                    <div class="tips" id="tips"></div>
+                </div>
+                
+                <div class="tourism-section" id="tourismSection">
+                    <div class="tourism-header">🗺️ 旅游规划建议</div>
+                    <div class="weather-note" id="weatherNote"></div>
+                    <div class="attraction-grid" id="attractionGrid"></div>
+                    
+                    <div class="itinerary-section">
+                        <div class="itinerary-title">📅 行程安排</div>
+                        <div id="itineraryList"></div>
+                    </div>
+                    
+                    <div class="cost-summary">
+                        <div class="cost-summary-title">💰 费用估算</div>
+                        <div class="cost-summary-grid" id="costGrid"></div>
+                        <div class="cost-total-box">
+                            <div class="cost-total-amount" id="totalCost"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card chat-section">
+            <div class="outfit-title">💬 对话咨询</div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    你好！我是智能天气穿搭助手。你可以：
+                    <br>• 输入城市名获取天气和穿搭建议
+                    <br>• 问我"明天天气怎么样"
+                    <br>• 问我"成都旅游攻略"
+                    <br>• 问我"旅游费用预算"
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="问我任何关于天气和穿搭的问题..." onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendChat()">发送</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentCityData = null;
+        
+        async function autoLocate() {
+            try {
+                const response = await fetch('/api/locate');
+                const data = await response.json();
+                if (data.city) {
+                    document.getElementById('currentCity').textContent = data.city;
+                    document.getElementById('cityInput').value = data.city;
+                    getWeather(data.city);
+                }
+            } catch (e) {
+                showError('自动定位失败，请手动输入城市');
+            }
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                getWeather();
+            }
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChat();
+            }
+        }
+        
+        async function getWeather(city) {
+            const cityName = city || document.getElementById('cityInput').value.trim();
+            if (!cityName) {
+                showError('请输入城市名称');
+                return;
+            }
+            
+            document.getElementById('searchBtn').disabled = true;
+            showLoading();
+            
+            try {
+                const response = await fetch(`/api/weather?city=${encodeURIComponent(cityName)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                currentCityData = data;
+                displayWeather(data);
+                document.getElementById('currentCity').textContent = data.city;
+                hideError();
+            } catch (e) {
+                console.error('获取天气失败:', e);
+                showError('获取天气失败: ' + e.message);
+            } finally {
+                document.getElementById('searchBtn').disabled = false;
+            }
+        }
+        
+        function displayWeather(data) {
+            document.getElementById('temp').innerHTML = `${data.current.temp}<sup>°C</sup>`;
+            document.getElementById('condition').textContent = data.current.condition;
+            document.getElementById('humidity').textContent = data.current.humidity + '%';
+            document.getElementById('wind').textContent = data.current.wind;
+            document.getElementById('comfort').textContent = data.analysis.comfort || '舒适';
+            
+            const forecastHtml = data.forecast.map(day => `
+                <div class="forecast-day">
+                    <div class="forecast-date">${day.date}</div>
+                    <div class="forecast-icon">${day.icon}</div>
+                    <div class="forecast-temp">${day.tempMax}° / ${day.tempMin}°</div>
+                </div>
+            `).join('');
+            document.getElementById('forecast').innerHTML = forecastHtml;
+            
+            const outfit = data.outfit;
+            const outfitHtml = `
+                <div class="outfit-item">
+                    <div class="outfit-label">上装</div>
+                    <div class="outfit-value">${outfit.top}</div>
+                </div>
+                <div class="outfit-item">
+                    <div class="outfit-label">下装</div>
+                    <div class="outfit-value">${outfit.bottom}</div>
+                </div>
+                <div class="outfit-item">
+                    <div class="outfit-label">鞋子</div>
+                    <div class="outfit-value">${outfit.shoes}</div>
+                </div>
+                <div class="outfit-item">
+                    <div class="outfit-label">配饰</div>
+                    <div class="outfit-value">${outfit.accessory}</div>
+                </div>
+            `;
+            document.getElementById('outfitItems').innerHTML = outfitHtml;
+            
+            const tips = (data.tips || []).map(tip => `<div class="tip-item">${tip}</div>`).join('');
+            document.getElementById('tips').innerHTML = tips;
+            
+            if (data.tourism) {
+                displayTourism(data.tourism);
+            }
+            
+            hideLoading();
+            document.getElementById('weatherDisplay').classList.add('active');
+        }
+        
+        function displayTourism(tourism) {
+            document.getElementById('weatherNote').textContent = tourism.weatherNote;
+            
+            const attractionHtml = tourism.attractions.map(attr => `
+                <div class="attraction-card">
+                    <img src="${attr.image}" alt="${attr.name}" loading="lazy">
+                    <div class="attraction-info">
+                        <div class="attraction-name">${attr.name}</div>
+                        <div class="attraction-desc">${attr.desc}</div>
+                        <div class="attraction-price">${attr.price > 0 ? '¥' + attr.price : '免费'}</div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('attractionGrid').innerHTML = attractionHtml;
+            
+            const itineraryHtml = tourism.itinerary.map(item => `
+                <div class="itinerary-item">
+                    <div class="itinerary-time">Day${item.day} ${item.period}</div>
+                    <div class="itinerary-content">${item.attraction.name}</div>
+                </div>
+            `).join('');
+            document.getElementById('itineraryList').innerHTML = itineraryHtml;
+            
+            const cost = tourism.costBreakdown;
+            const costHtml = `
+                <div class="cost-summary-item">
+                    <div class="cost-summary-label">门票</div>
+                    <div class="cost-summary-value">¥${cost.tickets}</div>
+                </div>
+                <div class="cost-summary-item">
+                    <div class="cost-summary-label">住宿</div>
+                    <div class="cost-summary-value">¥${cost.hotel}</div>
+                </div>
+                <div class="cost-summary-item">
+                    <div class="cost-summary-label">餐饮</div>
+                    <div class="cost-summary-value">¥${cost.food}</div>
+                </div>
+                <div class="cost-summary-item">
+                    <div class="cost-summary-label">交通</div>
+                    <div class="cost-summary-value">¥${cost.transport}</div>
+                </div>
+            `;
+            document.getElementById('costGrid').innerHTML = costHtml;
+            document.getElementById('totalCost').textContent = '¥' + cost.total;
+            
+            document.getElementById('tourismSection').classList.add('active');
+        }
+        
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            if (!currentCityData && !message.includes('天气')) {
+                addMessage('请先告诉我你在哪个城市，或者直接输入城市名查询天气~', 'bot');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        message: message,
+                        cityData: currentCityData
+                    })
+                });
+                const data = await response.json();
+                addRichMessage(data.reply, 'bot');
+            } catch (e) {
+                addMessage('抱歉，出错了，请稍后重试', 'bot');
+            }
+        }
+        
+        function addMessage(text, type) {
+            const messages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function addRichMessage(reply, type) {
+            const messages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            
+            if (!reply || reply.type === 'text') {
+                div.innerHTML = (reply ? reply.content : '').replace(/\n/g, '<br>');
+            } else if (reply.type === 'rich') {
+                let html = `<div class="rich-message">${reply.content.replace(/\n/g, '<br>')}</div>`;
+                
+                if (reply.cards && reply.cards.length > 0) {
+                    reply.cards.forEach(card => {
+                        if (card.type === 'image_card') {
+                            html += `
+                                <div class="image-card">
+                                    <img src="${card.image}" alt="${card.title}" loading="lazy">
+                                    <div class="image-card-content">
+                                        <div class="image-card-title">${card.title}</div>
+                                        <div class="image-card-desc">${card.desc}</div>
+                                        <div class="image-card-price">${card.price}</div>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (card.type === 'cost_card') {
+                            let breakdownHtml = card.breakdown.map(item => `
+                                <div class="cost-item">
+                                    <div class="cost-label">${item.label}</div>
+                                    <div class="cost-value">${item.value}</div>
+                                </div>
+                            `).join('');
+                            
+                            html += `
+                                <div class="cost-card">
+                                    <div class="cost-card-title">💰 ${card.city}旅游费用估算（${card.days}天）</div>
+                                    <div class="cost-breakdown">${breakdownHtml}</div>
+                                    <div class="cost-total">
+                                        <div class="cost-total-label">总计</div>
+                                        <div class="cost-total-value">${card.total}</div>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (card.type === 'food_card') {
+                            let specialtiesHtml = card.specialties.map(s => `<span class="food-tag">${s}</span>`).join('');
+                            html += `
+                                <div class="food-card">
+                                    <div class="food-card-title">🍜 ${card.city}必吃美食</div>
+                                    <div class="food-list">${specialtiesHtml}</div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                
+                div.innerHTML = html;
+            } else if (reply.type === 'plans') {
+                let html = `<div class="rich-message">${reply.content.replace(/\n/g, '<br>')}</div>`;
+                
+                if (reply.plans && reply.plans.length > 0) {
+                    reply.plans.forEach((plan, index) => {
+                        html += `<div class="plan-card-wrapper">`;
+                        html += `<div class="plan-header">方案${index + 1}</div>`;
+                        html += `<div class="plan-content">${plan.content.replace(/\n/g, '<br>')}</div>`;
+                        
+                        if (plan.sub_cards && plan.sub_cards.length > 0) {
+                            plan.sub_cards.forEach(card => {
+                                if (card.type === 'image_card') {
+                                    html += `
+                                        <div class="image-card">
+                                            <img src="${card.image}" alt="${card.title}" loading="lazy">
+                                            <div class="image-card-content">
+                                                <div class="image-card-title">${card.title}</div>
+                                                <div class="image-card-desc">${card.desc}</div>
+                                                <div class="image-card-price">${card.price}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                } else if (card.type === 'cost_card') {
+                                    let breakdownHtml = card.breakdown.map(item => `
+                                        <div class="cost-item">
+                                            <div class="cost-label">${item.label}</div>
+                                            <div class="cost-value">${item.value}</div>
+                                        </div>
+                                    `).join('');
+                                    
+                                    html += `
+                                        <div class="cost-card">
+                                            <div class="cost-card-title">💰 ${card.city}旅游费用估算（${card.days}天）</div>
+                                            <div class="cost-breakdown">${breakdownHtml}</div>
+                                            <div class="cost-total">
+                                                <div class="cost-total-label">总计</div>
+                                                <div class="cost-total-value">${card.total}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                } else if (card.type === 'food_card') {
+                                    let specialtiesHtml = card.specialties.map(s => `<span class="food-tag">${s}</span>`).join('');
+                                    html += `
+                                        <div class="food-card">
+                                            <div class="food-card-title">🍜 ${card.city}必吃美食</div>
+                                            <div class="food-list">${specialtiesHtml}</div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                        }
+                        
+                        html += `</div>`;
+                    });
+                }
+                
+                div.innerHTML = html;
+            }
+            
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('weatherDisplay').classList.remove('active');
+            hideError();
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function showError(msg) {
+            document.getElementById('error').textContent = msg;
+            document.getElementById('error').style.display = 'block';
+            hideLoading();
+        }
+        
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+        
+        window.onload = function() {
+            autoLocate();
+        };
+    </script>
+</body>
+</html>
