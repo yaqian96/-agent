@@ -5,952 +5,620 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能天气穿搭助手</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        
-        .location-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .current-location {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .location-icon {
-            font-size: 2em;
-        }
-        
-        .location-name {
-            font-size: 1.5em;
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .input-group input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 50px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        
-        .input-group input:focus {
-            border-color: #667eea;
-        }
-        
-        .input-group button {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .input-group button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .input-group button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .auto-locate-btn {
-            display: block;
-            margin: 0 auto 20px;
-            padding: 10px 25px;
-            background: #f0f0f0;
-            color: #666;
-            border: none;
-            border-radius: 30px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .auto-locate-btn:hover {
-            background: #e0e0e0;
-        }
-        
-        .weather-display {
-            display: none;
-        }
-        
-        .weather-display.active {
-            display: block;
-        }
-        
-        .current-weather {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .temp {
-            font-size: 4em;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .temp sup {
-            font-size: 0.4em;
-        }
-        
-        .condition {
-            font-size: 1.5em;
-            color: #666;
-            margin: 10px 0;
-        }
-        
-        .weather-details {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .detail-item {
-            text-align: center;
-        }
-        
-        .detail-label {
-            font-size: 0.9em;
-            color: #999;
-        }
-        
-        .detail-value {
-            font-size: 1.2em;
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .forecast {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .forecast-day {
-            background: #f8f9fa;
-            padding: 15px 10px;
-            border-radius: 10px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        
-        .forecast-day:hover {
-            transform: translateY(-5px);
-        }
-        
-        .forecast-date {
-            font-size: 0.9em;
-            color: #999;
-            margin-bottom: 5px;
-        }
-        
-        .forecast-icon {
-            font-size: 1.5em;
-            margin: 5px 0;
-        }
-        
-        .forecast-temp {
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .outfit-recommendation {
-            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-        
-        .outfit-title {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .outfit-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        
-        .outfit-item {
-            background: rgba(255,255,255,0.8);
-            padding: 15px;
-            border-radius: 10px;
-        }
-        
-        .outfit-label {
-            font-size: 0.9em;
-            color: #999;
-            margin-bottom: 5px;
-        }
-        
-        .outfit-value {
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .tips {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 10px;
-        }
-        
-        .tip-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 8px 0;
-            color: #666;
-        }
-        
-        .chat-section {
-            margin-top: 20px;
-        }
-        
-        .chat-messages {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-        
-        .message {
-            padding: 12px 18px;
-            border-radius: 18px;
-            margin-bottom: 10px;
-            max-width: 80%;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .message.user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 5px;
-        }
-        
-        .message.bot {
-            background: #f0f0f0;
-            color: #333;
-            border-bottom-left-radius: 5px;
-        }
-        
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-input input {
-            flex: 1;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 30px;
-            font-size: 14px;
-            outline: none;
-        }
-        
-        .chat-input input:focus {
-            border-color: #667eea;
-        }
-        
-        .chat-input button {
-            padding: 12px 25px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-        
-        .rich-message {
-            line-height: 1.6;
-        }
-        
-        .image-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 12px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .image-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-        
-        .image-card-content {
-            padding: 12px;
-        }
-        
-        .image-card-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 6px;
-        }
-        
-        .image-card-desc {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        
-        .image-card-price {
-            font-size: 0.9em;
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        
-        .cost-card {
-            background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 12px 0;
-            border: 1px solid #ffd700;
-        }
-        
-        .cost-card-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .cost-breakdown {
-            display: grid;
-            gap: 8px;
-        }
-        
-        .cost-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-        
-        .cost-item:last-child {
-            border-bottom: none;
-        }
-        
-        .cost-label {
-            color: #666;
-        }
-        
-        .cost-value {
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .cost-total {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0 0;
-            margin-top: 8px;
-            border-top: 2px solid #ffd700;
-            font-size: 1.1em;
-        }
-        
-        .cost-total-label {
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .cost-total-value {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #e74c3c;
-        }
-        
-        .food-card {
-            background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 12px 0;
-            border: 1px solid #ff9999;
-        }
-        
-        .food-card-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 12px;
-        }
-        
-        .food-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        .food-tag {
-            background: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            color: #e74c3c;
-            border: 1px solid #ff9999;
-        }
-        
-        .plan-card-wrapper {
-            background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 16px 0;
-            border: 2px solid #667eea;
-        }
-        
-        .plan-header {
-            font-size: 1.3em;
-            font-weight: bold;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; }
+        
+        .sidebar { width: 280px; background: rgba(255,255,255,0.95); border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; overflow: hidden; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #e0e0e0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .sidebar-header h2 { font-size: 1.2em; margin-bottom: 8px; }
+        .sidebar-header p { font-size: 0.85em; opacity: 0.9; }
+        
+        .stats-bar { padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-around; font-size: 0.85em; }
+        .stat-item { text-align: center; }
+        .stat-value { font-weight: bold; color: #667eea; font-size: 1.2em; }
+        .stat-label { color: #666; margin-top: 2px; }
+        
+        .history-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .history-item { padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: flex-start; }
+        .history-item:hover { background: #f0f0f0; border-color: #e0e0e0; }
+        .history-item.active { background: #eef1ff; border-color: #667eea; }
+        
+        .history-content { flex: 1; cursor: pointer; min-width: 0; }
+        .history-city { font-weight: bold; color: #333; margin-bottom: 4px; }
+        .history-preview { font-size: 0.85em; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .history-meta { font-size: 0.75em; color: #999; display: flex; gap: 12px; }
+        
+        .delete-btn { width: 24px; height: 24px; border: none; background: #f5f5f5; border-radius: 50%; color: #999; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; margin-left: 8px; opacity: 0; }
+        .history-item:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover { background: #ff4757; color: white; }
+        
+        .main-content { flex: 1; margin-left: 280px; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .header { text-align: center; color: white; margin-bottom: 10px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        
+        .location-bar { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
+        .current-city { font-size: 1.1em; color: white; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; }
+        .auto-locate-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+        .auto-locate-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        
+        .weather-section { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .current-weather { text-align: center; padding: 20px; }
+        .current-weather .city { font-size: 1.5em; font-weight: bold; color: #333; margin-bottom: 15px; }
+        .temp { font-size: 4em; font-weight: bold; color: #667eea; }
+        .condition { font-size: 1.5em; color: #666; margin: 10px 0; }
+        
+        .weather-details { display: flex; justify-content: space-around; margin-top: 20px; gap: 10px; }
+        .detail-item { text-align: center; flex: 1; }
+        .detail-label { color: #999; font-size: 0.9em; margin-bottom: 5px; }
+        .detail-value { color: #333; font-weight: bold; }
+        
+        .forecast { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+        .forecast-day { flex: 0 0 auto; text-align: center; padding: 10px 15px; background: #f8f9fa; border-radius: 10px; min-width: 80px; }
+        .forecast-date { color: #666; font-size: 0.9em; margin-bottom: 5px; }
+        .forecast-icon { font-size: 1.5em; margin: 5px 0; }
+        .forecast-temp { color: #333; font-weight: bold; font-size: 0.9em; }
+        
+        .outfit-recommendation { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .outfit-title { font-size: 1.2em; font-weight: bold; color: #333; margin-bottom: 15px; }
+        .outfit-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .outfit-item { background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center; }
+        .outfit-label { color: #999; font-size: 0.85em; margin-bottom: 8px; }
+        .outfit-value { color: #333; font-weight: bold; }
+        
+        .tips { margin-top: 15px; }
+        .tip-item { background: #fff3cd; padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; color: #856404; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .input-group input { flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border-color 0.3s; }
+        .input-group input:focus { outline: none; border-color: #667eea; }
+        .input-group button { padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; transition: transform 0.2s; }
+        .input-group button:hover { transform: translateY(-2px); }
+        
+        .chat-section { min-height: 400px; display: flex; flex-direction: column; }
+        .chat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .chat-stats { color: #666; font-size: 0.9em; }
+        
+        .chat-messages { flex: 1; min-height: 300px; max-height: 500px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 10px; margin-bottom: 15px; }
+        .message { padding: 12px 16px; border-radius: 10px; margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; }
+        .message.user { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-left: 20%; }
+        .message.bot { background: white; color: #333; margin-right: 20%; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: flex-start; }
+        .message.bot.streaming .message-content::after {
+            content: '▋';
+            display: inline-block;
+            margin-left: 2px;
             color: #667eea;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
+            animation: blink-cursor 0.8s step-end infinite;
+        }
+        @keyframes blink-cursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
         
-        .plan-content {
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
+        .message-content { flex: 1; }
+        .message-actions { display: flex; gap: 8px; margin-left: 10px; }
         
-        .tourism-section {
-            display: none;
-            margin-top: 20px;
-        }
+        .play-audio-btn { background: #667eea; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; opacity: 0.7; }
+        .play-audio-btn:hover { opacity: 1; transform: scale(1.1); }
+        .play-audio-btn.playing { background: #ff4757; animation: pulse 1s infinite; }
         
-        .tourism-section.active {
-            display: block;
-        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         
-        .tourism-header {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .chat-input { display: flex; gap: 10px; align-items: center; }
+        .chat-input input { flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 25px; font-size: 1em; transition: border-color 0.3s; }
+        .chat-input input.recognizing { border-color: #667eea; background: #f8f9ff; }
         
-        .attraction-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+        .chat-input button { padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; font-size: 1em; cursor: pointer; transition: all 0.3s; }
+        .chat-input button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
         
-        .attraction-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
+        .voice-btn { background: #f0f0f0; color: #667eea; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .voice-btn:hover { background: #667eea; color: white; }
+        .voice-btn.recording { background: #ff4757; color: white; animation: recording-pulse 1s infinite; }
+        .voice-btn.disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
         
-        .attraction-card:hover {
-            transform: translateY(-5px);
-        }
+        @keyframes recording-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); } }
         
-        .attraction-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
+        .voice-select { padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.85em; cursor: pointer; background: white; }
+        .voice-select:focus { outline: none; border-color: #667eea; }
         
-        .attraction-info {
-            padding: 12px;
-        }
+        .token-warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .token-warning button { background: #ffc107; color: #333; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
-        .attraction-name {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 6px;
-        }
+        .loading { text-align: center; padding: 40px; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .attraction-desc {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 8px;
-        }
+        .error-msg { background: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 8px; margin-top: 10px; }
         
-        .attraction-price {
-            font-size: 0.9em;
-            color: #e74c3c;
-            font-weight: bold;
-        }
+        .recording-indicator { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 71, 87, 0.95); color: white; padding: 12px 24px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .recording-indicator.active { display: block; }
+        .recording-indicator .dot { display: inline-block; width: 8px; height: 8px; background: white; border-radius: 50%; margin-right: 8px; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         
-        .itinerary-section {
-            margin-top: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-radius: 12px;
-        }
-        
-        .itinerary-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 12px;
-        }
-        
-        .itinerary-item {
-            display: flex;
-            gap: 12px;
-            padding: 10px 0;
-            border-bottom: 1px dashed #999;
-        }
-        
-        .itinerary-item:last-child {
-            border-bottom: none;
-        }
-        
-        .itinerary-time {
-            min-width: 80px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .itinerary-content {
-            flex: 1;
-            color: #333;
-        }
-        
-        .cost-summary {
-            margin-top: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
-            border-radius: 12px;
-            border: 2px solid #ffd700;
-        }
-        
-        .cost-summary-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-        }
-        
-        .cost-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-        }
-        
-        .cost-summary-item {
-            text-align: center;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-        }
-        
-        .cost-summary-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .cost-summary-value {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #e74c3c;
-        }
-        
-        .cost-total-box {
-            margin-top: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .cost-total-amount {
-            font-size: 2em;
-            font-weight: bold;
-            color: #e74c3c;
-        }
-        
-        .weather-note {
-            padding: 12px;
-            background: #e3f2fd;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            color: #1976d2;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-msg {
-            text-align: center;
-            padding: 20px;
-            color: #e74c3c;
-        }
-        
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .temp {
-                font-size: 3em;
-            }
-            
-            .input-group {
-                flex-direction: column;
-            }
-        }
+        @media (max-width: 900px) { .weather-section { grid-template-columns: 1fr; } .sidebar { width: 100%; position: relative; height: auto; } .main-content { margin-left: 0; } }
+        @media (max-width: 600px) { .header h1 { font-size: 1.8em; } .temp { font-size: 3em; } .input-group { flex-direction: column; } }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="recording-indicator" id="recordingIndicator">
+        <span class="dot"></span>正在录音...
+    </div>
+    
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🌤️ 天气助手</h2>
+            <p>智能穿搭建议</p>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item"><div class="stat-value" id="statConversations">0</div><div class="stat-label">对话</div></div>
+            <div class="stat-item"><div class="stat-value" id="statMessages">0</div><div class="stat-label">消息</div></div>
+            <div class="stat-item"><div class="stat-value" id="statTokens">0</div><div class="stat-label">Tokens</div></div>
+        </div>
+        <div id="tokenWarning" class="token-warning" style="display: none;">
+            <span>⚠️</span>
+            <span id="tokenWarningText"></span>
+            <button onclick="compressCurrentConversation()">压缩历史</button>
+        </div>
+        <button class="auto-locate-btn" onclick="startNewChat()" style="margin: 10px;">🆕 新对话</button>
+        <div class="history-list" id="historyList"><div class="history-item" style="text-align: center; color: #999; padding: 20px;">暂无对话记录<br>开始聊天吧</div></div>
+    </div>
+    
+    <div class="main-content">
         <div class="header">
             <h1>🌤️ 智能天气穿搭助手</h1>
-            <p>告诉我你在哪个城市，我为你提供天气和穿搭建议</p>
+            <div class="location-bar">
+                <div class="current-city" id="currentCity">未定位</div>
+                <button class="auto-locate-btn" onclick="autoLocate()">📍 自动获取位置</button>
+            </div>
         </div>
         
         <div class="card">
-            <div class="location-section">
-                <div class="current-location">
-                    <span class="location-icon">📍</span>
-                    <span class="location-name" id="currentCity">未定位</span>
-                </div>
-                <button class="auto-locate-btn" onclick="autoLocate()">📍 自动获取当前位置</button>
-            </div>
-            
+            <div class="outfit-title">🏙️ 城市天气查询</div>
             <div class="input-group">
-                <input type="text" id="cityInput" placeholder="请输入城市名称，如：北京、上海、广州" onkeypress="handleKeyPress(event)">
+                <input type="text" id="cityInput" placeholder="请输入城市名称" onkeypress="handleKeyPress(event)">
                 <button onclick="getWeather()" id="searchBtn">获取建议</button>
             </div>
-            
-            <div id="loading" class="loading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>正在获取天气数据...</p>
-            </div>
-            
+            <div id="loading" class="loading" style="display: none;"><div class="loading-spinner"></div><p>正在获取天气数据...</p></div>
             <div id="error" class="error-msg" style="display: none;"></div>
-            
             <div class="weather-display" id="weatherDisplay">
                 <div class="current-weather">
+                    <div class="city" id="currentCityName"></div>
                     <div class="temp" id="temp">--<sup>°C</sup></div>
                     <div class="condition" id="condition">--</div>
                     <div class="weather-details">
-                        <div class="detail-item">
-                            <div class="detail-label">湿度</div>
-                            <div class="detail-value" id="humidity">--%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">风力</div>
-                            <div class="detail-value" id="wind">--</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">体感</div>
-                            <div class="detail-value" id="comfort">--</div>
-                        </div>
+                        <div class="detail-item"><div class="detail-label">湿度</div><div class="detail-value" id="humidity">--%</div></div>
+                        <div class="detail-item"><div class="detail-label">风力</div><div class="detail-value" id="wind">--</div></div>
+                        <div class="detail-item"><div class="detail-label">体感</div><div class="detail-value" id="comfort">--</div></div>
                     </div>
                 </div>
-                
                 <div class="forecast" id="forecast"></div>
-                
                 <div class="outfit-recommendation">
                     <div class="outfit-title">👔 今日穿搭建议</div>
                     <div class="outfit-items" id="outfitItems"></div>
-                    <div class="tips" id="tips"></div>
                 </div>
-                
-                <div class="tourism-section" id="tourismSection">
-                    <div class="tourism-header">🗺️ 旅游规划建议</div>
-                    <div class="weather-note" id="weatherNote"></div>
-                    <div class="attraction-grid" id="attractionGrid"></div>
-                    
-                    <div class="itinerary-section">
-                        <div class="itinerary-title">📅 行程安排</div>
-                        <div id="itineraryList"></div>
-                    </div>
-                    
-                    <div class="cost-summary">
-                        <div class="cost-summary-title">💰 费用估算</div>
-                        <div class="cost-summary-grid" id="costGrid"></div>
-                        <div class="cost-total-box">
-                            <div class="cost-total-amount" id="totalCost"></div>
-                        </div>
-                    </div>
-                </div>
+                <div class="tips" id="tips"></div>
             </div>
         </div>
         
         <div class="card chat-section">
-            <div class="outfit-title">💬 对话咨询</div>
+            <div class="chat-header">
+                <div class="outfit-title">💬 对话咨询</div>
+                <div class="chat-stats" id="chatStats">消息: 0 | Tokens: 0</div>
+            </div>
             <div class="chat-messages" id="chatMessages">
-                <div class="message bot">
-                    你好！我是智能天气穿搭助手。你可以：
-                    <br>• 输入城市名获取天气和穿搭建议
-                    <br>• 问我"明天天气怎么样"
-                    <br>• 问我"成都旅游攻略"
-                    <br>• 问我"旅游费用预算"
-                </div>
+                <div class="message bot">你好！我是智能天气穿搭助手。你可以：<br>• 输入城市名获取天气和穿搭建议<br>• 点击🎤进行语音输入<br>• 选择不同音色听回复</div>
             </div>
             <div class="chat-input">
+                <select id="voiceSelect" class="voice-select" onchange="updateVoiceSettings()">
+                    <option value="101007">🎤 云小梦(女声)</option>
+                    <option value="101008">🎤 云小月(女声)</option>
+                    <option value="101009">🎤 云贝贝(女声)</option>
+                    <option value="101010">🎤 云媛珍(女声)</option>
+                    <option value="0">🎤 智逍遥</option>
+                    <option value="6">🎤 智渊(男声)</option>
+                </select>
                 <input type="text" id="chatInput" placeholder="问我任何关于天气和穿搭的问题..." onkeypress="handleChatKeyPress(event)">
-                <button onclick="sendChat()">发送</button>
+                <button id="voiceInputBtn" class="voice-btn" onclick="toggleRecording()" title="点击录音">🎤</button>
+                <button onclick="sendChatStream()">发送</button>
             </div>
         </div>
     </div>
     
     <script>
         let currentCityData = null;
+        let currentConvId = "";
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioContext = null;
+        let recordingStream = null;
+        let ws = null;
+        let isPlaying = false;
+        let currentPlayingBtn = null;
+        let streamAudioPlayer = null;
+        let ttsTextBuffer = '';
+        let ttsSentenceIndex = 0;
+        let ttsStreamActive = false;
+        let ttsPendingSentences = [];
         
-        async function autoLocate() {
+        const VOICE_SETTINGS = { voice_type: 101007, speed: 1.0, volume: 5 };
+
+        class StreamAudioPlayer {
+            constructor() {
+                this.queue = [];
+                this.isPlaying = false;
+                this.currentAudio = null;
+                this.stopped = false;
+                this.objectUrls = [];
+            }
+
+            reset() {
+                this.stop();
+                this.stopped = false;
+            }
+
+            stop() {
+                this.stopped = true;
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio.onended = null;
+                    this.currentAudio.onerror = null;
+                    this.currentAudio = null;
+                }
+                this.queue = [];
+                this.isPlaying = false;
+                this.objectUrls.forEach(url => URL.revokeObjectURL(url));
+                this.objectUrls = [];
+            }
+
+            enqueueBase64(base64) {
+                if (this.stopped || !base64) return;
+                this.queue.push(base64);
+                if (!this.isPlaying) this.playNext();
+            }
+
+            playNext() {
+                if (this.stopped) {
+                    this.isPlaying = false;
+                    return;
+                }
+                if (this.queue.length === 0) {
+                    this.isPlaying = false;
+                    if (currentPlayingBtn) resetPlayButton();
+                    return;
+                }
+
+                this.isPlaying = true;
+                const base64 = this.queue.shift();
+                const blob = base64ToBlob(base64, 'audio/mpeg');
+                const url = URL.createObjectURL(blob);
+                this.objectUrls.push(url);
+                this.currentAudio = new Audio(url);
+                this.currentAudio.onended = () => {
+                    URL.revokeObjectURL(url);
+                    this.playNext();
+                };
+                this.currentAudio.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    this.playNext();
+                };
+                this.currentAudio.play().catch(() => this.playNext());
+            }
+        }
+
+        function extractCompleteSentences(buffer) {
+            const complete = [];
+            const re = /([^。！？；\n]+[。！？；\n])/g;
+            let match;
+            let lastIndex = 0;
+            while ((match = re.exec(buffer)) !== null) {
+                complete.push(match[1].trim());
+                lastIndex = re.lastIndex;
+            }
+            return { complete, remainder: buffer.slice(lastIndex) };
+        }
+
+        function getStreamAudioPlayer() {
+            if (!streamAudioPlayer) streamAudioPlayer = new StreamAudioPlayer();
+            return streamAudioPlayer;
+        }
+
+        async function loadConversations() {
             try {
-                const response = await fetch('/api/locate');
-                const data = await response.json();
-                if (data.city) {
-                    document.getElementById('currentCity').textContent = data.city;
-                    document.getElementById('cityInput').value = data.city;
-                    getWeather(data.city);
+                const res = await fetch('/api/conversations');
+                const data = await res.json();
+                if (data.conversations?.length > 0) {
+                    renderHistoryList(data.conversations);
+                } else {
+                    document.getElementById('historyList').innerHTML = '<div class="history-item" style="text-align: center; color: #999; padding: 20px;">暂无对话记录<br>点击下方按钮开始新对话</div>';
+                }
+            } catch (e) { console.error('加载对话列表失败:', e); }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/conversations/stats');
+                const data = await res.json();
+                document.getElementById('statConversations').textContent = data.total_conversations;
+                document.getElementById('statMessages').textContent = data.total_messages;
+                document.getElementById('statTokens').textContent = data.total_tokens.toLocaleString();
+            } catch (e) { console.error('加载统计数据失败:', e); }
+        }
+
+        function renderHistoryList(conversations) {
+            const html = conversations.map(conv => {
+                const date = new Date(conv.lastUpdated * 1000);
+                return `<div class="history-item ${conv.id === currentConvId ? 'active' : ''}">
+                    <div class="history-content" onclick="loadConversation('${conv.id}')">
+                        <div class="history-city">${conv.city || '未指定城市'}</div>
+                        <div class="history-preview">${conv.preview}</div>
+                        <div class="history-meta"><span>💬 ${conv.messageCount}</span><span>📅 ${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}</span></div>
+                    </div>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteConversation('${conv.id}')">✕</button>
+                </div>`;
+            }).join('');
+            document.getElementById('historyList').innerHTML = html;
+        }
+
+        async function loadConversation(convId) {
+            try {
+                const res = await fetch(`/api/conversations/${convId}`);
+                const data = await res.json();
+                if (data.error) return;
+                currentConvId = convId;
+                currentCityData = { city: data.city };
+                document.getElementById('chatMessages').innerHTML = '';
+                data.messages.forEach(msg => addMessage(msg.content, msg.role));
+                loadConversations();
+                updateChatStats(data.message_count, data.total_tokens);
+            } catch (e) { console.error('加载对话失败:', e); }
+        }
+
+        function startNewChat() {
+            currentConvId = "";
+            currentCityData = null;
+            document.getElementById('chatMessages').innerHTML = '<div class="message bot">你好！我是智能天气穿搭助手。你可以：<br>• 输入城市名获取天气和穿搭建议<br>• 点击🎤进行语音输入<br>• 选择不同音色听回复</div>';
+            document.getElementById('chatStats').textContent = '消息: 0 | Tokens: 0';
+            document.getElementById('tokenWarning').style.display = 'none';
+            document.getElementById('cityInput').value = '';
+            document.getElementById('weatherDisplay').style.display = 'none';
+            document.getElementById('currentCity').textContent = '未定位';
+            loadConversations();
+        }
+
+        async function autoLocate() {
+            const cityEl = document.getElementById('currentCity');
+            cityEl.textContent = '定位中...';
+
+            try {
+                const gpsCity = await locateByBrowser();
+                if (gpsCity) {
+                    applyLocatedCity(gpsCity);
+                    return;
                 }
             } catch (e) {
+                console.warn('浏览器定位失败，尝试 IP 定位:', e);
+            }
+
+            try {
+                const res = await fetch('/api/locate');
+                const data = await res.json();
+                if (data.city) {
+                    applyLocatedCity(data.city);
+                } else {
+                    cityEl.textContent = '未定位';
+                    showError(data.error || '自动定位失败，请手动输入城市');
+                }
+            } catch (e) {
+                cityEl.textContent = '未定位';
                 showError('自动定位失败，请手动输入城市');
             }
         }
-        
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                getWeather();
-            }
+
+        function applyLocatedCity(city) {
+            document.getElementById('currentCity').textContent = city;
+            document.getElementById('cityInput').value = city;
+            getWeather(city);
         }
-        
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendChat();
-            }
-        }
-        
-        async function getWeather(city) {
-            const cityName = city || document.getElementById('cityInput').value.trim();
-            if (!cityName) {
-                showError('请输入城市名称');
-                return;
-            }
-            
-            document.getElementById('searchBtn').disabled = true;
-            showLoading();
-            
-            try {
-                const response = await fetch(`/api/weather?city=${encodeURIComponent(cityName)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    showError(data.error);
+
+        function locateByBrowser() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('浏览器不支持定位'));
                     return;
                 }
-                
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        try {
+                            const { latitude, longitude } = pos.coords;
+                            const res = await fetch(`/api/locate?lat=${latitude}&lon=${longitude}`);
+                            const data = await res.json();
+                            resolve(data.city || null);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    },
+                    (err) => reject(err),
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                );
+            });
+        }
+
+        function handleKeyPress(e) { if (e.key === 'Enter') getWeather(); }
+        function handleChatKeyPress(e) { if (e.key === 'Enter') sendChatStream(); }
+
+        async function getWeather(city) {
+            const cityName = city || document.getElementById('cityInput').value.trim();
+            if (!cityName) { showError('请输入城市名称'); return; }
+            document.getElementById('searchBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const res = await fetch(`/api/weather?city=${encodeURIComponent(cityName)}`);
+                const data = await res.json();
+                if (data.error) { showError(data.error); return; }
                 currentCityData = data;
                 displayWeather(data);
                 document.getElementById('currentCity').textContent = data.city;
-                hideError();
-            } catch (e) {
-                console.error('获取天气失败:', e);
-                showError('获取天气失败: ' + e.message);
-            } finally {
-                document.getElementById('searchBtn').disabled = false;
-            }
+                document.getElementById('error').style.display = 'none';
+            } catch (e) { showError('获取天气失败: ' + e.message); } finally { document.getElementById('searchBtn').disabled = false; }
         }
-        
+
         function displayWeather(data) {
+            document.getElementById('currentCityName').textContent = data.city;
             document.getElementById('temp').innerHTML = `${data.current.temp}<sup>°C</sup>`;
             document.getElementById('condition').textContent = data.current.condition;
             document.getElementById('humidity').textContent = data.current.humidity + '%';
             document.getElementById('wind').textContent = data.current.wind;
             document.getElementById('comfort').textContent = data.analysis.comfort || '舒适';
             
-            const forecastHtml = data.forecast.map(day => `
-                <div class="forecast-day">
-                    <div class="forecast-date">${day.date}</div>
-                    <div class="forecast-icon">${day.icon}</div>
-                    <div class="forecast-temp">${day.tempMax}° / ${day.tempMin}°</div>
-                </div>
-            `).join('');
-            document.getElementById('forecast').innerHTML = forecastHtml;
+            document.getElementById('forecast').innerHTML = data.forecast.map(day => 
+                `<div class="forecast-day"><div class="forecast-date">${day.date}</div><div class="forecast-icon">${day.icon}</div><div class="forecast-temp">${day.tempMax}° / ${day.tempMin}°</div></div>`
+            ).join('');
             
             const outfit = data.outfit;
-            const outfitHtml = `
-                <div class="outfit-item">
-                    <div class="outfit-label">上装</div>
-                    <div class="outfit-value">${outfit.top}</div>
-                </div>
-                <div class="outfit-item">
-                    <div class="outfit-label">下装</div>
-                    <div class="outfit-value">${outfit.bottom}</div>
-                </div>
-                <div class="outfit-item">
-                    <div class="outfit-label">鞋子</div>
-                    <div class="outfit-value">${outfit.shoes}</div>
-                </div>
-                <div class="outfit-item">
-                    <div class="outfit-label">配饰</div>
-                    <div class="outfit-value">${outfit.accessory}</div>
-                </div>
+            document.getElementById('outfitItems').innerHTML = `
+                <div class="outfit-item"><div class="outfit-label">上装</div><div class="outfit-value">${outfit.top}</div></div>
+                <div class="outfit-item"><div class="outfit-label">下装</div><div class="outfit-value">${outfit.bottom}</div></div>
+                <div class="outfit-item"><div class="outfit-label">鞋子</div><div class="outfit-value">${outfit.shoes}</div></div>
+                <div class="outfit-item"><div class="outfit-label">配饰</div><div class="outfit-value">${outfit.accessory}</div></div>
             `;
-            document.getElementById('outfitItems').innerHTML = outfitHtml;
             
-            const tips = (data.tips || []).map(tip => `<div class="tip-item">${tip}</div>`).join('');
-            document.getElementById('tips').innerHTML = tips;
-            
-            if (data.tourism) {
-                displayTourism(data.tourism);
+            document.getElementById('tips').innerHTML = (data.tips || []).map(tip => `<div class="tip-item">${tip}</div>`).join('');
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('weatherDisplay').style.display = 'block';
+        }
+
+        async function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
             }
-            
-            hideLoading();
-            document.getElementById('weatherDisplay').classList.add('active');
         }
-        
-        function displayTourism(tourism) {
-            document.getElementById('weatherNote').textContent = tourism.weatherNote;
-            
-            const attractionHtml = tourism.attractions.map(attr => `
-                <div class="attraction-card">
-                    <img src="${attr.image}" alt="${attr.name}" loading="lazy">
-                    <div class="attraction-info">
-                        <div class="attraction-name">${attr.name}</div>
-                        <div class="attraction-desc">${attr.desc}</div>
-                        <div class="attraction-price">${attr.price > 0 ? '¥' + attr.price : '免费'}</div>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('attractionGrid').innerHTML = attractionHtml;
-            
-            const itineraryHtml = tourism.itinerary.map(item => `
-                <div class="itinerary-item">
-                    <div class="itinerary-time">Day${item.day} ${item.period}</div>
-                    <div class="itinerary-content">${item.attraction.name}</div>
-                </div>
-            `).join('');
-            document.getElementById('itineraryList').innerHTML = itineraryHtml;
-            
-            const cost = tourism.costBreakdown;
-            const costHtml = `
-                <div class="cost-summary-item">
-                    <div class="cost-summary-label">门票</div>
-                    <div class="cost-summary-value">¥${cost.tickets}</div>
-                </div>
-                <div class="cost-summary-item">
-                    <div class="cost-summary-label">住宿</div>
-                    <div class="cost-summary-value">¥${cost.hotel}</div>
-                </div>
-                <div class="cost-summary-item">
-                    <div class="cost-summary-label">餐饮</div>
-                    <div class="cost-summary-value">¥${cost.food}</div>
-                </div>
-                <div class="cost-summary-item">
-                    <div class="cost-summary-label">交通</div>
-                    <div class="cost-summary-value">¥${cost.transport}</div>
-                </div>
-            `;
-            document.getElementById('costGrid').innerHTML = costHtml;
-            document.getElementById('totalCost').textContent = '¥' + cost.total;
-            
-            document.getElementById('tourismSection').classList.add('active');
+
+        async function startRecording() {
+            try {
+                recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                    ? 'audio/webm;codecs=opus'
+                    : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
+
+                mediaRecorder = mimeType
+                    ? new MediaRecorder(recordingStream, { mimeType })
+                    : new MediaRecorder(recordingStream);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.start(250);
+                isRecording = true;
+
+                document.getElementById('voiceInputBtn').classList.add('recording');
+                document.getElementById('voiceInputBtn').textContent = '🔴';
+                document.getElementById('recordingIndicator').classList.add('active');
+
+            } catch (e) {
+                console.error('录音失败:', e);
+                alert('无法访问麦克风，请检查权限设置');
+            }
         }
-        
-        async function sendChat() {
+
+        function stopRecording() {
+            if (!isRecording || !mediaRecorder) return;
+
+            mediaRecorder.onstop = () => {
+                if (recordingStream) {
+                    recordingStream.getTracks().forEach(track => track.stop());
+                    recordingStream = null;
+                }
+                mediaRecorder = null;
+                isRecording = false;
+
+                document.getElementById('voiceInputBtn').classList.remove('recording');
+                document.getElementById('voiceInputBtn').textContent = '🎤';
+                document.getElementById('recordingIndicator').classList.remove('active');
+
+                uploadAndRecognize();
+            };
+
+            mediaRecorder.stop();
+        }
+
+        async function uploadAndRecognize() {
+            if (audioChunks.length === 0) return;
+
+            const audioBlob = new Blob(audioChunks, { type: audioChunks[0].type || 'audio/webm' });
+            audioChunks = [];
+
+            const chatInput = document.getElementById('chatInput');
+            const voiceBtn = document.getElementById('voiceInputBtn');
+            chatInput.classList.add('recognizing');
+            chatInput.placeholder = '正在识别语音...';
+            voiceBtn.classList.add('disabled');
+
+            try {
+                const pcmBlob = await convertTo16kPcm(audioBlob);
+                const fd = new FormData();
+                fd.append('file', pcmBlob, 'recording.pcm');
+                fd.append('format', 'pcm');
+
+                const response = await fetch('/api/asr', {
+                    method: 'POST',
+                    body: fd
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.text) {
+                    chatInput.value = '';
+                    await sendChatStream(data.text.trim());
+                } else {
+                    alert('语音识别失败: ' + (data.error || '未知错误'));
+                }
+            } catch (e) {
+                console.error('语音识别失败:', e);
+                alert('语音识别失败，请重试或使用文字输入');
+            } finally {
+                chatInput.classList.remove('recognizing');
+                chatInput.placeholder = '问我任何关于天气和穿搭的问题...';
+                voiceBtn.classList.remove('disabled');
+            }
+        }
+
+        async function convertTo16kPcm(blob) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const decodeContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await decodeContext.decodeAudioData(arrayBuffer.slice(0));
+            await decodeContext.close();
+
+            const targetSampleRate = 16000;
+            const offlineContext = new OfflineAudioContext(1, Math.ceil(audioBuffer.duration * targetSampleRate), targetSampleRate);
+            const source = offlineContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(offlineContext.destination);
+            source.start(0);
+
+            const rendered = await offlineContext.startRendering();
+            const channelData = rendered.getChannelData(0);
+            const pcmData = new Int16Array(channelData.length);
+
+            for (let i = 0; i < channelData.length; i++) {
+                const sample = Math.max(-1, Math.min(1, channelData[i]));
+                pcmData[i] = sample < 0 ? sample * 32768 : sample * 32767;
+            }
+
+            return new Blob([pcmData.buffer], { type: 'audio/pcm' });
+        }
+
+        async function sendChatStream(messageOverride) {
             const input = document.getElementById('chatInput');
-            const message = input.value.trim();
+            const message = (messageOverride || input.value).trim();
             if (!message) return;
             
             addMessage(message, 'user');
@@ -961,171 +629,363 @@
                 return;
             }
             
+            if (!currentCityData && message.includes('天气')) {
+                addMessage('正在获取天气数据...', 'bot');
+                const cityInput = document.getElementById('cityInput').value.trim();
+                if (cityInput) await getWeather(cityInput);
+                else { addMessage('请先输入城市名称', 'bot'); return; }
+            }
+            
             try {
-                const response = await fetch('/api/chat', {
+                const res = await fetch('/api/chat/stream', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        message: message,
-                        cityData: currentCityData
-                    })
+                    body: JSON.stringify({ message, cityData: currentCityData, convId: currentConvId })
                 });
-                const data = await response.json();
-                addRichMessage(data.reply, 'bot');
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                const state = { botMessageDiv: null, fullReply: '' };
+                let sseBuffer = '';
+                ttsTextBuffer = '';
+                ttsSentenceIndex = 0;
+                ttsPendingSentences = [];
+                ttsStreamActive = true;
+                getStreamAudioPlayer().reset();
+                ensureVoiceWebSocket();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    sseBuffer += decoder.decode(value, { stream: true });
+                    const lines = sseBuffer.split('\n');
+                    sseBuffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            await handleChatStreamEvent(data, state);
+                        } catch (e) {
+                            console.error('Parse error:', e);
+                        }
+                    }
+                }
             } catch (e) {
+                console.error('发送消息失败:', e);
                 addMessage('抱歉，出错了，请稍后重试', 'bot');
+            } finally {
+                ttsStreamActive = false;
             }
         }
-        
+
         function addMessage(text, type) {
             const messages = document.getElementById('chatMessages');
             const div = document.createElement('div');
             div.className = `message ${type}`;
-            div.innerHTML = text.replace(/\n/g, '<br>');
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
-        }
-        
-        function addRichMessage(reply, type) {
-            const messages = document.getElementById('chatMessages');
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
             
-            if (!reply || reply.type === 'text') {
-                div.innerHTML = (reply ? reply.content : '').replace(/\n/g, '<br>');
-            } else if (reply.type === 'rich') {
-                let html = `<div class="rich-message">${reply.content.replace(/\n/g, '<br>')}</div>`;
-                
-                if (reply.cards && reply.cards.length > 0) {
-                    reply.cards.forEach(card => {
-                        if (card.type === 'image_card') {
-                            html += `
-                                <div class="image-card">
-                                    <img src="${card.image}" alt="${card.title}" loading="lazy">
-                                    <div class="image-card-content">
-                                        <div class="image-card-title">${card.title}</div>
-                                        <div class="image-card-desc">${card.desc}</div>
-                                        <div class="image-card-price">${card.price}</div>
-                                    </div>
-                                </div>
-                            `;
-                        } else if (card.type === 'cost_card') {
-                            let breakdownHtml = card.breakdown.map(item => `
-                                <div class="cost-item">
-                                    <div class="cost-label">${item.label}</div>
-                                    <div class="cost-value">${item.value}</div>
-                                </div>
-                            `).join('');
-                            
-                            html += `
-                                <div class="cost-card">
-                                    <div class="cost-card-title">💰 ${card.city}旅游费用估算（${card.days}天）</div>
-                                    <div class="cost-breakdown">${breakdownHtml}</div>
-                                    <div class="cost-total">
-                                        <div class="cost-total-label">总计</div>
-                                        <div class="cost-total-value">${card.total}</div>
-                                    </div>
-                                </div>
-                            `;
-                        } else if (card.type === 'food_card') {
-                            let specialtiesHtml = card.specialties.map(s => `<span class="food-tag">${s}</span>`).join('');
-                            html += `
-                                <div class="food-card">
-                                    <div class="food-card-title">🍜 ${card.city}必吃美食</div>
-                                    <div class="food-list">${specialtiesHtml}</div>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-                
-                div.innerHTML = html;
-            } else if (reply.type === 'plans') {
-                let html = `<div class="rich-message">${reply.content.replace(/\n/g, '<br>')}</div>`;
-                
-                if (reply.plans && reply.plans.length > 0) {
-                    reply.plans.forEach((plan, index) => {
-                        html += `<div class="plan-card-wrapper">`;
-                        html += `<div class="plan-header">方案${index + 1}</div>`;
-                        html += `<div class="plan-content">${plan.content.replace(/\n/g, '<br>')}</div>`;
-                        
-                        if (plan.sub_cards && plan.sub_cards.length > 0) {
-                            plan.sub_cards.forEach(card => {
-                                if (card.type === 'image_card') {
-                                    html += `
-                                        <div class="image-card">
-                                            <img src="${card.image}" alt="${card.title}" loading="lazy">
-                                            <div class="image-card-content">
-                                                <div class="image-card-title">${card.title}</div>
-                                                <div class="image-card-desc">${card.desc}</div>
-                                                <div class="image-card-price">${card.price}</div>
-                                            </div>
-                                        </div>
-                                    `;
-                                } else if (card.type === 'cost_card') {
-                                    let breakdownHtml = card.breakdown.map(item => `
-                                        <div class="cost-item">
-                                            <div class="cost-label">${item.label}</div>
-                                            <div class="cost-value">${item.value}</div>
-                                        </div>
-                                    `).join('');
-                                    
-                                    html += `
-                                        <div class="cost-card">
-                                            <div class="cost-card-title">💰 ${card.city}旅游费用估算（${card.days}天）</div>
-                                            <div class="cost-breakdown">${breakdownHtml}</div>
-                                            <div class="cost-total">
-                                                <div class="cost-total-label">总计</div>
-                                                <div class="cost-total-value">${card.total}</div>
-                                            </div>
-                                        </div>
-                                    `;
-                                } else if (card.type === 'food_card') {
-                                    let specialtiesHtml = card.specialties.map(s => `<span class="food-tag">${s}</span>`).join('');
-                                    html += `
-                                        <div class="food-card">
-                                            <div class="food-card-title">🍜 ${card.city}必吃美食</div>
-                                            <div class="food-list">${specialtiesHtml}</div>
-                                        </div>
-                                    `;
-                                }
-                            });
-                        }
-                        
-                        html += `</div>`;
-                    });
-                }
-                
-                div.innerHTML = html;
+            if (type === 'bot') {
+                div.innerHTML = `<div class="message-content">${text.replace(/\n/g, '<br>')}</div><div class="message-actions"><button class="play-audio-btn" onclick="playTTS(this, '${text.replace(/'/g, "\\'").replace(/\n/g, ' ')}')">🔊</button></div>`;
+            } else {
+                div.textContent = text;
             }
             
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
+            return div;
         }
-        
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('weatherDisplay').classList.remove('active');
-            hideError();
+
+        function addStreamingMessage(type) {
+            const messages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${type} streaming`;
+            div.innerHTML = `<div class="message-content"></div><div class="message-actions"><button class="play-audio-btn" style="opacity: 0.3;">🔊</button></div>`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            return div;
         }
-        
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
+
+        function appendTextToMessage(div, text) {
+            const contentDiv = div.querySelector('.message-content');
+            if (!contentDiv.dataset.streamText) contentDiv.dataset.streamText = '';
+            contentDiv.dataset.streamText += text;
+            contentDiv.textContent = contentDiv.dataset.streamText;
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
         }
-        
-        function showError(msg) {
-            document.getElementById('error').textContent = msg;
-            document.getElementById('error').style.display = 'block';
-            hideLoading();
+
+        function finalizeMessage(div, fullText) {
+            div.classList.remove('streaming');
+            const contentDiv = div.querySelector('.message-content');
+            delete contentDiv.dataset.streamText;
+            contentDiv.innerHTML = fullText.replace(/\n/g, '<br>');
+            const playBtn = div.querySelector('.play-audio-btn');
+            playBtn.style.opacity = '0.7';
+            playBtn.onclick = () => playTTS(playBtn, fullText);
+            if (!isPlaying) {
+                playBtn.classList.remove('playing');
+                playBtn.textContent = '🔊';
+            }
         }
-        
-        function hideError() {
-            document.getElementById('error').style.display = 'none';
+
+        function waitNextFrame() {
+            return new Promise(resolve => requestAnimationFrame(resolve));
         }
-        
-        window.onload = function() {
-            autoLocate();
-        };
+
+        async function handleChatStreamEvent(data, state) {
+            if (data.type === 'text') {
+                if (!state.botMessageDiv) {
+                    state.botMessageDiv = addStreamingMessage('bot');
+                }
+                state.fullReply += data.content;
+                appendTextToMessage(state.botMessageDiv, data.content);
+                queueStreamingTTS(data.content);
+                await waitNextFrame();
+            } else if (data.type === 'done') {
+                currentConvId = data.convId || currentConvId;
+                if (state.botMessageDiv) {
+                    finalizeMessage(state.botMessageDiv, state.fullReply);
+                    flushStreamingTTS(true);
+                }
+                loadConversations();
+                loadStats();
+            } else if (data.type === 'error') {
+                console.error('Stream error:', data.message);
+                if (state.botMessageDiv) {
+                    appendTextToMessage(state.botMessageDiv, '\n[错误: ' + data.message + ']');
+                }
+            }
+        }
+
+        function updateChatStats(messageCount, totalTokens) {
+            document.getElementById('chatStats').textContent = `消息: ${messageCount} | Tokens: ${totalTokens.toLocaleString()}`;
+        }
+
+        function queueStreamingTTS(textChunk) {
+            if (!ttsStreamActive || !textChunk) return;
+            ttsTextBuffer += textChunk;
+            flushStreamingTTS(false);
+        }
+
+        function flushStreamingTTS(force) {
+            const { complete, remainder } = extractCompleteSentences(ttsTextBuffer);
+            ttsTextBuffer = remainder;
+
+            for (const sentence of complete) {
+                sendTtsSentence(sentence);
+            }
+
+            if (force && ttsTextBuffer.trim()) {
+                sendTtsSentence(ttsTextBuffer.trim());
+                ttsTextBuffer = '';
+            }
+
+            if (force && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'end' }));
+            }
+        }
+
+        function sendTtsSentence(sentence) {
+            if (!sentence) return;
+            ttsPendingSentences.push(sentence);
+            ensureVoiceWebSocket();
+            flushTtsPendingSentences();
+        }
+
+        function flushTtsPendingSentences() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            while (ttsPendingSentences.length) {
+                const sentence = ttsPendingSentences.shift();
+                ws.send(JSON.stringify({
+                    type: 'sentence',
+                    text: sentence,
+                    index: ttsSentenceIndex++,
+                    voice_type: VOICE_SETTINGS.voice_type,
+                    speed: VOICE_SETTINGS.speed,
+                    volume: VOICE_SETTINGS.volume,
+                }));
+            }
+        }
+
+        function ensureVoiceWebSocket() {
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                return;
+            }
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/voice`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                flushTtsPendingSentences();
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'audio') {
+                        getStreamAudioPlayer().enqueueBase64(data.data);
+                        if (botMessageDivPlaying()) {
+                            const playBtn = document.querySelector('.message.bot:last-child .play-audio-btn');
+                            if (playBtn && !currentPlayingBtn) {
+                                playBtn.classList.add('playing');
+                                playBtn.textContent = '⏸️';
+                                currentPlayingBtn = playBtn;
+                                isPlaying = true;
+                            }
+                        }
+                    } else if (data.type === 'error') {
+                        console.error('WebSocket TTS error:', data.message);
+                    }
+                } catch (e) {
+                    console.error('WebSocket message error:', e);
+                }
+            };
+
+            ws.onerror = (error) => console.error('WebSocket error:', error);
+            ws.onclose = () => {
+                console.log('WebSocket closed');
+                setTimeout(() => { if (!ws || ws.readyState !== WebSocket.OPEN) ws = null; }, 3000);
+            };
+        }
+
+        function botMessageDivPlaying() {
+            return ttsStreamActive;
+        }
+
+        async function startVoiceStream(text) {
+            if (!text) return;
+            getStreamAudioPlayer().reset();
+            ensureVoiceWebSocket();
+            const trySend = () => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'start',
+                        text,
+                        voice_type: VOICE_SETTINGS.voice_type,
+                        speed: VOICE_SETTINGS.speed,
+                        volume: VOICE_SETTINGS.volume,
+                    }));
+                } else if (ws && ws.readyState === WebSocket.CONNECTING) {
+                    ws.addEventListener('open', trySend, { once: true });
+                }
+            };
+            trySend();
+        }
+
+        async function playTTS(btn, text) {
+            if (isPlaying && currentPlayingBtn === btn) {
+                stopCurrentAudio();
+                return;
+            }
+            stopCurrentAudio();
+
+            try {
+                btn.classList.add('playing');
+                btn.textContent = '⏸️';
+                currentPlayingBtn = btn;
+                isPlaying = true;
+
+                const player = getStreamAudioPlayer();
+                player.reset();
+
+                const res = await fetch('/api/tts/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text,
+                        voice_type: VOICE_SETTINGS.voice_type,
+                        speed: VOICE_SETTINGS.speed,
+                        volume: VOICE_SETTINGS.volume,
+                        stream: 'sse',
+                    }),
+                });
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        const data = JSON.parse(line.substring(6));
+                        if (data.type === 'audio') {
+                            player.enqueueBase64(data.data);
+                        } else if (data.type === 'error') {
+                            alert('语音合成失败: ' + data.message);
+                            resetPlayButton();
+                            return;
+                        } else if (data.type === 'done') {
+                            player.stopped = false;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('TTS播放错误:', e);
+                alert('播放失败，请稍后重试');
+                resetPlayButton();
+            }
+        }
+
+        function stopCurrentAudio() {
+            if (streamAudioPlayer) streamAudioPlayer.stop();
+            resetPlayButton();
+        }
+
+        function resetPlayButton() {
+            if (currentPlayingBtn) { 
+                currentPlayingBtn.classList.remove('playing'); 
+                currentPlayingBtn.textContent = '🔊'; 
+                currentPlayingBtn = null; 
+            }
+            isPlaying = false;
+        }
+
+        function base64ToBlob(base64, mimeType) {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
+            return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+        }
+
+        async function compressCurrentConversation() {
+            if (!currentConvId) return;
+            try {
+                const res = await fetch(`/api/conversations/${currentConvId}/compress`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ keepRecent: 10 })
+                });
+                const data = await res.json();
+                if (data.success) { alert(data.message); await loadConversation(currentConvId); document.getElementById('tokenWarning').style.display = 'none'; loadStats(); }
+                else alert(data.message);
+            } catch (e) { alert('压缩失败，请重试'); }
+        }
+
+        async function deleteConversation(convId) {
+            if (!confirm('确定要删除这条对话记录吗？')) return;
+            try {
+                const res = await fetch(`/api/conversations/${convId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) { if (currentConvId === convId) startNewChat(); loadConversations(); loadStats(); }
+                else alert('删除失败，请重试');
+            } catch (e) { alert('删除失败，请重试'); }
+        }
+
+        function showError(msg) { document.getElementById('error').textContent = msg; document.getElementById('error').style.display = 'block'; document.getElementById('loading').style.display = 'none'; }
+
+        function updateVoiceSettings() { VOICE_SETTINGS.voice_type = parseInt(document.getElementById('voiceSelect').value); }
+
+        window.onload = () => { loadConversations(); loadStats(); autoLocate(); };
+        window.onbeforeunload = () => { stopCurrentAudio(); if (ws) ws.close(); };
     </script>
 </body>
 </html>
