@@ -1,3 +1,5 @@
+import env_config  # noqa: F401
+from env_config import tencent_config_error
 import os
 import re
 import base64

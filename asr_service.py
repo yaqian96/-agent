@@ -2,6 +2,8 @@ import os
 import base64
 import subprocess
 import tempfile
+import env_config  # noqa: F401  加载 .env
+from env_config import tencent_config_error
 from tencentcloud.common import credential
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
@@ -16,6 +18,10 @@ class ASRService:
         self.appid = int(os.environ.get('TENCENT_APP_ID', '0'))
 
     def _create_client(self):
+        if not self.secret_id or not self.secret_key:
+            print('Missing TENCENT_SECRET_ID or TENCENT_SECRET_KEY')
+            return None
+
         try:
             cred = credential.Credential(self.secret_id, self.secret_key)
             http_profile = HttpProfile()
@@ -77,7 +83,7 @@ class ASRService:
         try:
             client = self._create_client()
             if not client:
-                return {'success': False, 'error': '语音识别服务初始化失败'}
+                return {'success': False, 'error': tencent_config_error()}
 
             pcm_data = self._prepare_pcm_audio(audio_data, format)
 

@@ -3,7 +3,9 @@ import json
 import time
 from typing import List, Dict, Any
 
-TOKEN_LIMIT = 100000  
+TOKEN_LIMIT = 100000
+MESSAGE_LIMIT = 10
+
 
 class ConversationManager:
     def __init__(self, history_file: str = "conversation_history.json"):
@@ -79,6 +81,58 @@ class ConversationManager:
             del self.conversations[conv_id]
             self._save_history()
     
+    def check_message_limit(self, conv_id: str) -> Dict:
+        conv = self.conversations.get(conv_id, {})
+        count = conv.get('message_count', 0)
+        total_tokens = conv.get('total_tokens', 0)
+        limit = MESSAGE_LIMIT
+
+        base = {
+            'message_count': count,
+            'total_tokens': total_tokens,
+            'message_limit': limit,
+            'remaining': max(0, limit - count),
+        }
+
+        if count >= limit:
+            return {
+                **base,
+                'limit_reached': True,
+                'warning': True,
+                'message': (
+                    f'⚠️ 本对话已达 {limit} 条消息上限，请点击左侧「新对话」继续聊天。'
+                ),
+            }
+
+        if count + 2 > limit:
+            return {
+                **base,
+                'limit_reached': True,
+                'warning': True,
+                'message': (
+                    f'⚠️ 当前已有 {count}/{limit} 条消息，无法再完成本轮问答，请开启新对话。'
+                ),
+            }
+
+        hint = ''
+        if count >= limit - 2:
+            hint = (
+                f'💡 提示：每轮对话最多 {limit} 条消息，当前 {count}/{limit}，'
+                f'本轮结束后将无法继续发送。'
+            )
+        elif count >= limit - 4:
+            hint = f'💡 提示：每轮对话最多 {limit} 条消息，当前 {count}/{limit}。'
+
+        return {
+            **base,
+            'limit_reached': False,
+            'warning': bool(hint),
+            'message': hint,
+        }
+
+    def can_add_exchange(self, conv_id: str) -> bool:
+        return not self.check_message_limit(conv_id).get('limit_reached', False)
+
     def check_token_limit(self, conv_id: str) -> Dict:
         conv = self.conversations.get(conv_id, {})
         total_tokens = conv.get("total_tokens", 0)
@@ -153,7 +207,8 @@ class ConversationManager:
             "total_conversations": total_conversations,
             "total_messages": total_messages,
             "total_tokens": total_tokens,
-            "token_limit": TOKEN_LIMIT
+            "token_limit": TOKEN_LIMIT,
+            "message_limit": MESSAGE_LIMIT,
         }
 
 

@@ -13,12 +13,61 @@
         .sidebar-header h2 { font-size: 1.2em; margin-bottom: 8px; }
         .sidebar-header p { font-size: 0.85em; opacity: 0.9; }
         
-        .stats-bar { padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-around; font-size: 0.85em; }
+        .stats-bar { padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-around; font-size: 0.85em; flex-shrink: 0; }
         .stat-item { text-align: center; }
         .stat-value { font-weight: bold; color: #667eea; font-size: 1.2em; }
         .stat-label { color: #666; margin-top: 2px; }
         
-        .history-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .history-list { flex: 1; overflow-y: auto; padding: 8px; min-height: 0; }
+
+        .sidebar-actions {
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+            background: #fff;
+        }
+        .sidebar-btn {
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .sidebar-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .sidebar-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+        }
+        .sidebar-btn-secondary {
+            background: #fff8e6;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        .sidebar-btn-secondary:hover {
+            background: #fff3cd;
+        }
+        .sidebar-notice {
+            margin: 0 12px 8px;
+            padding: 12px;
+            background: #fff8e6;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            color: #856404;
+            font-size: 0.85em;
+            line-height: 1.5;
+            flex-shrink: 0;
+        }
+        .sidebar-notice p { margin: 0 0 10px; word-break: break-word; }
         .history-item { padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: flex-start; }
         .history-item:hover { background: #f0f0f0; border-color: #e0e0e0; }
         .history-item.active { background: #eef1ff; border-color: #667eea; }
@@ -79,7 +128,22 @@
         
         .chat-section { min-height: 400px; display: flex; flex-direction: column; }
         .chat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-        .chat-stats { color: #666; font-size: 0.9em; }
+        .chat-stats { color: #666; font-size: 0.9em; white-space: nowrap; }
+        .chat-limit-hint {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            background: #fff8e6;
+            color: #856404;
+            border: 1px solid #ffe8a3;
+        }
+        .chat-limit-hint.danger {
+            background: #fff5f5;
+            color: #c0392b;
+            border-color: #ffc9c9;
+        }
         
         .chat-messages { flex: 1; min-height: 300px; max-height: 500px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 10px; margin-bottom: 15px; }
         .message { padding: 12px 16px; border-radius: 10px; margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; }
@@ -96,6 +160,30 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
+
+        .message.bot.thinking {
+            margin-right: 20%;
+            border-style: dashed;
+            border-color: #c5cae9;
+            background: #f5f7ff;
+            color: #667eea;
+        }
+        .message.bot.thinking .message-actions { display: none; }
+        .thinking-text { font-weight: 500; }
+        .thinking-dots span {
+            animation: thinking-dot 1.2s ease-in-out infinite;
+            opacity: 0.3;
+        }
+        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes thinking-dot {
+            0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-3px); }
+        }
+
+        .chat-input.busy input,
+        .chat-input.busy button:not(.voice-btn) { opacity: 0.65; pointer-events: none; }
+        .chat-input.busy .voice-btn.disabled { opacity: 0.5; }
         
         .message-content { flex: 1; }
         .message-actions { display: flex; gap: 8px; margin-left: 10px; }
@@ -124,7 +212,7 @@
         .voice-select:focus { outline: none; border-color: #667eea; }
         
         .token-warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .token-warning button { background: #ffc107; color: #333; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .token-warning button { background: #ffc107; color: #333; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; }
         
         .loading { text-align: center; padding: 40px; }
         .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
@@ -156,13 +244,14 @@
             <div class="stat-item"><div class="stat-value" id="statMessages">0</div><div class="stat-label">消息</div></div>
             <div class="stat-item"><div class="stat-value" id="statTokens">0</div><div class="stat-label">Tokens</div></div>
         </div>
-        <div id="tokenWarning" class="token-warning" style="display: none;">
-            <span>⚠️</span>
-            <span id="tokenWarningText"></span>
-            <button onclick="compressCurrentConversation()">压缩历史</button>
+        <div class="sidebar-actions">
+            <button type="button" class="sidebar-btn sidebar-btn-primary" onclick="startNewChat()">🆕 新对话</button>
         </div>
-        <button class="auto-locate-btn" onclick="startNewChat()" style="margin: 10px;">🆕 新对话</button>
-        <div class="history-list" id="historyList"><div class="history-item" style="text-align: center; color: #999; padding: 20px;">暂无对话记录<br>开始聊天吧</div></div>
+        <div id="tokenWarning" class="sidebar-notice" style="display: none;">
+            <p id="tokenWarningText"></p>
+            <button type="button" class="sidebar-btn sidebar-btn-secondary" onclick="compressCurrentConversation()">📦 压缩历史</button>
+        </div>
+        <div class="history-list" id="historyList"><div class="history-item" style="text-align: center; color: #999; padding: 20px;">暂无对话记录<br>点击上方「新对话」开始</div></div>
     </div>
     
     <div class="main-content">
@@ -204,13 +293,16 @@
         
         <div class="card chat-section">
             <div class="chat-header">
-                <div class="outfit-title">💬 对话咨询</div>
-                <div class="chat-stats" id="chatStats">消息: 0 | Tokens: 0</div>
+                <div>
+                    <div class="outfit-title">💬 对话咨询</div>
+                    <div id="chatLimitHint" class="chat-limit-hint" style="display: none;"></div>
+                </div>
+                <div class="chat-stats" id="chatStats" title="每轮对话最多 10 条消息">消息: 0/10 | Tokens: 0</div>
             </div>
             <div class="chat-messages" id="chatMessages">
-                <div class="message bot">你好！我是智能天气穿搭助手。你可以：<br>• 输入城市名获取天气和穿搭建议<br>• 点击🎤进行语音输入<br>• 选择不同音色听回复</div>
+                <div class="message bot">你好！我是智能天气穿搭助手。你可以：<br>• 输入城市名获取天气和穿搭建议<br>• 点击🎤进行语音输入<br>• 选择不同音色听回复<br>• 每轮对话最多 10 条消息</div>
             </div>
-            <div class="chat-input">
+            <div class="chat-input" id="chatInputBar">
                 <select id="voiceSelect" class="voice-select" onchange="updateVoiceSettings()">
                     <option value="101007">🎤 云小梦(女声)</option>
                     <option value="101008">🎤 云小月(女声)</option>
@@ -221,14 +313,17 @@
                 </select>
                 <input type="text" id="chatInput" placeholder="问我任何关于天气和穿搭的问题..." onkeypress="handleChatKeyPress(event)">
                 <button id="voiceInputBtn" class="voice-btn" onclick="toggleRecording()" title="点击录音">🎤</button>
-                <button onclick="sendChatStream()">发送</button>
+                <button id="chatSendBtn" onclick="sendChatStream()">发送</button>
             </div>
         </div>
     </div>
     
     <script>
+        const CHAT_MESSAGE_LIMIT = 10;
         let currentCityData = null;
         let currentConvId = "";
+        let sessionStats = { messageCount: 0, totalTokens: 0, messageLimit: CHAT_MESSAGE_LIMIT };
+        let chatBusy = false;
         let isRecording = false;
         let mediaRecorder = null;
         let audioChunks = [];
@@ -242,6 +337,8 @@
         let ttsSentenceIndex = 0;
         let ttsStreamActive = false;
         let ttsPendingSentences = [];
+        let ttsSessionId = 0;
+        let ttsAutoPlayDone = false;
         
         const VOICE_SETTINGS = { voice_type: 101007, speed: 1.0, volume: 5 };
 
@@ -286,7 +383,8 @@
                 }
                 if (this.queue.length === 0) {
                     this.isPlaying = false;
-                    if (currentPlayingBtn) resetPlayButton();
+                    ttsStreamActive = false;
+                    resetPlayButton();
                     return;
                 }
 
@@ -332,7 +430,7 @@
                 if (data.conversations?.length > 0) {
                     renderHistoryList(data.conversations);
                 } else {
-                    document.getElementById('historyList').innerHTML = '<div class="history-item" style="text-align: center; color: #999; padding: 20px;">暂无对话记录<br>点击下方按钮开始新对话</div>';
+                    document.getElementById('historyList').innerHTML = '<div class="history-item" style="text-align: center; color: #999; padding: 20px;">暂无对话记录<br>点击上方「新对话」开始</div>';
                 }
             } catch (e) { console.error('加载对话列表失败:', e); }
         }
@@ -372,16 +470,35 @@
                 document.getElementById('chatMessages').innerHTML = '';
                 data.messages.forEach(msg => addMessage(msg.content, msg.role));
                 loadConversations();
-                updateChatStats(data.message_count, data.total_tokens);
+                applySessionStats({
+                    messageCount: data.message_count || 0,
+                    totalTokens: data.total_tokens || 0,
+                    messageLimit: CHAT_MESSAGE_LIMIT,
+                });
             } catch (e) { console.error('加载对话失败:', e); }
+        }
+
+        function updateTokenWarning(show, message) {
+            const el = document.getElementById('tokenWarning');
+            const text = document.getElementById('tokenWarningText');
+            if (!el || !text) return;
+            if (show && message) {
+                text.textContent = message;
+                el.style.display = 'block';
+            } else {
+                text.textContent = '';
+                el.style.display = 'none';
+            }
         }
 
         function startNewChat() {
             currentConvId = "";
             currentCityData = null;
-            document.getElementById('chatMessages').innerHTML = '<div class="message bot">你好！我是智能天气穿搭助手。你可以：<br>• 输入城市名获取天气和穿搭建议<br>• 点击🎤进行语音输入<br>• 选择不同音色听回复</div>';
-            document.getElementById('chatStats').textContent = '消息: 0 | Tokens: 0';
-            document.getElementById('tokenWarning').style.display = 'none';
+            sessionStats = { messageCount: 0, totalTokens: 0, messageLimit: CHAT_MESSAGE_LIMIT };
+            document.getElementById('chatMessages').innerHTML = '<div class="message bot">你好！我是智能天气穿搭助手。你可以：<br>• 输入城市名获取天气和穿搭建议<br>• 点击🎤进行语音输入<br>• 选择不同音色听回复<br>• 每轮对话最多 10 条消息</div>';
+            updateChatStats(0, 0, CHAT_MESSAGE_LIMIT);
+            hideChatLimitHint();
+            updateTokenWarning(false);
             document.getElementById('cityInput').value = '';
             document.getElementById('weatherDisplay').style.display = 'none';
             document.getElementById('currentCity').textContent = '未定位';
@@ -407,6 +524,9 @@
                 const data = await res.json();
                 if (data.city) {
                     applyLocatedCity(data.city);
+                    if (data.source === 'default') {
+                        showError(`外部定位服务不可用，已使用默认城市：${data.city}。可手动修改城市。`);
+                    }
                 } else {
                     cityEl.textContent = '未定位';
                     showError(data.error || '自动定位失败，请手动输入城市');
@@ -616,26 +736,104 @@
             return new Blob([pcmData.buffer], { type: 'audio/pcm' });
         }
 
+        function isWeatherQuestion(text) {
+            const keywords = ['天气', '气温', '温度', '下雨', '穿搭', '穿衣', '穿什么', '紫外线', '防晒', '预报', '多少度', '明天', '后天', '一周'];
+            return keywords.some(kw => text.includes(kw));
+        }
+
+        function setChatBusy(busy) {
+            chatBusy = busy;
+            const bar = document.getElementById('chatInputBar');
+            const input = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('chatSendBtn');
+            const voiceBtn = document.getElementById('voiceInputBtn');
+            if (bar) bar.classList.toggle('busy', busy);
+            if (input) input.disabled = busy;
+            if (sendBtn) {
+                sendBtn.disabled = busy;
+                sendBtn.textContent = busy ? '思考中...' : '发送';
+            }
+            if (voiceBtn && busy) voiceBtn.classList.add('disabled');
+            else if (voiceBtn && !isRecording) voiceBtn.classList.remove('disabled');
+        }
+
+        function addThinkingMessage() {
+            const messages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message bot thinking';
+            div.innerHTML = (
+                '<div class="message-content">'
+                + '<span class="thinking-text">AI 正在思考中</span>'
+                + '<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span>'
+                + '</div>'
+            );
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            return div;
+        }
+
+        function removeThinkingMessage(thinkingDiv) {
+            if (thinkingDiv && thinkingDiv.parentNode) {
+                thinkingDiv.remove();
+            }
+        }
+
+        function promoteThinkingToStreaming(thinkingDiv) {
+            thinkingDiv.classList.remove('thinking');
+            thinkingDiv.classList.add('streaming');
+            const contentDiv = thinkingDiv.querySelector('.message-content');
+            contentDiv.innerHTML = '';
+            contentDiv.dataset.streamText = '';
+            if (!thinkingDiv.querySelector('.message-actions')) {
+                const actions = document.createElement('div');
+                actions.className = 'message-actions';
+                actions.innerHTML = '<button class="play-audio-btn" style="opacity: 0.3;">🔊</button>';
+                thinkingDiv.appendChild(actions);
+            }
+            return thinkingDiv;
+        }
+
         async function sendChatStream(messageOverride) {
             const input = document.getElementById('chatInput');
             const message = (messageOverride || input.value).trim();
-            if (!message) return;
-            
-            addMessage(message, 'user');
-            input.value = '';
-            
-            if (!currentCityData && !message.includes('天气')) {
-                addMessage('请先告诉我你在哪个城市，或者直接输入城市名查询天气~', 'bot');
+            if (!message || chatBusy) return;
+
+            if (sessionStats.messageCount >= sessionStats.messageLimit) {
+                showChatLimitHint({
+                    limitWarning: true,
+                    limitMessage: `⚠️ 本对话已达 ${sessionStats.messageLimit} 条消息上限，请点击左侧「新对话」继续聊天。`,
+                    limitReached: true,
+                });
+                addMessage(`⚠️ 本对话已达 ${sessionStats.messageLimit} 条消息上限，请点击左侧「新对话」继续聊天。`, 'bot');
+                return;
+            }
+            if (sessionStats.messageCount + 2 > sessionStats.messageLimit) {
+                showChatLimitHint({
+                    limitWarning: true,
+                    limitMessage: `⚠️ 当前已有 ${sessionStats.messageCount}/${sessionStats.messageLimit} 条消息，无法再完成本轮问答，请开启新对话。`,
+                    limitReached: true,
+                });
+                addMessage(`⚠️ 当前已有 ${sessionStats.messageCount}/${sessionStats.messageLimit} 条消息，无法再完成本轮问答，请开启新对话。`, 'bot');
                 return;
             }
             
-            if (!currentCityData && message.includes('天气')) {
-                addMessage('正在获取天气数据...', 'bot');
+            addMessage(message, 'user');
+            input.value = '';
+
+            if (!currentCityData && isWeatherQuestion(message)) {
                 const cityInput = document.getElementById('cityInput').value.trim();
-                if (cityInput) await getWeather(cityInput);
-                else { addMessage('请先输入城市名称', 'bot'); return; }
+                if (cityInput) {
+                    await getWeather(cityInput);
+                } else {
+                    addMessage('查询天气相关问题前，请先输入城市或点击「自动获取位置」~', 'bot');
+                    return;
+                }
             }
-            
+
+            const state = { botMessageDiv: null, thinkingDiv: null, fullReply: '' };
+            setChatBusy(true);
+            state.thinkingDiv = addThinkingMessage();
+
             try {
                 const res = await fetch('/api/chat/stream', {
                     method: 'POST',
@@ -645,14 +843,10 @@
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
-                const state = { botMessageDiv: null, fullReply: '' };
                 let sseBuffer = '';
-                ttsTextBuffer = '';
-                ttsSentenceIndex = 0;
-                ttsPendingSentences = [];
-                ttsStreamActive = true;
-                getStreamAudioPlayer().reset();
-                ensureVoiceWebSocket();
+                ttsSessionId += 1;
+                ttsAutoPlayDone = false;
+                stopVoicePlayback();
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -674,9 +868,14 @@
                 }
             } catch (e) {
                 console.error('发送消息失败:', e);
+                removeThinkingMessage(state.thinkingDiv);
+                state.thinkingDiv = null;
                 addMessage('抱歉，出错了，请稍后重试', 'bot');
             } finally {
-                ttsStreamActive = false;
+                if (state.thinkingDiv && !state.botMessageDiv) {
+                    removeThinkingMessage(state.thinkingDiv);
+                }
+                setChatBusy(false);
             }
         }
 
@@ -733,32 +932,158 @@
         }
 
         async function handleChatStreamEvent(data, state) {
-            if (data.type === 'text') {
+            if (data.type === 'status' && data.status === 'thinking') {
+                if (!state.botMessageDiv && !state.thinkingDiv) {
+                    state.thinkingDiv = addThinkingMessage();
+                }
+            } else if (data.type === 'text') {
                 if (!state.botMessageDiv) {
-                    state.botMessageDiv = addStreamingMessage('bot');
+                    if (state.thinkingDiv) {
+                        state.botMessageDiv = promoteThinkingToStreaming(state.thinkingDiv);
+                        state.thinkingDiv = null;
+                    } else {
+                        state.botMessageDiv = addStreamingMessage('bot');
+                    }
                 }
                 state.fullReply += data.content;
                 appendTextToMessage(state.botMessageDiv, data.content);
-                queueStreamingTTS(data.content);
                 await waitNextFrame();
+            } else if (data.type === 'limit') {
+                removeThinkingMessage(state.thinkingDiv);
+                state.thinkingDiv = null;
+                addMessage(data.message || '本对话消息已达上限', 'bot');
+                applySessionStats({
+                    messageCount: data.messageCount ?? sessionStats.messageCount,
+                    totalTokens: data.totalTokens ?? sessionStats.totalTokens,
+                    messageLimit: data.messageLimit ?? CHAT_MESSAGE_LIMIT,
+                    limitWarning: true,
+                    limitMessage: data.message,
+                    limitReached: true,
+                });
             } else if (data.type === 'done') {
                 currentConvId = data.convId || currentConvId;
                 if (state.botMessageDiv) {
                     finalizeMessage(state.botMessageDiv, state.fullReply);
-                    flushStreamingTTS(true);
+                    autoPlayReplyOnce(state.fullReply, state.botMessageDiv);
                 }
+                applySessionStats({
+                    messageCount: data.messageCount ?? sessionStats.messageCount,
+                    totalTokens: data.totalTokens ?? sessionStats.totalTokens,
+                    messageLimit: data.messageLimit ?? CHAT_MESSAGE_LIMIT,
+                    limitWarning: data.limitWarning,
+                    limitMessage: data.limitMessage,
+                    limitReached: data.limitReached,
+                });
                 loadConversations();
                 loadStats();
             } else if (data.type === 'error') {
                 console.error('Stream error:', data.message);
+                removeThinkingMessage(state.thinkingDiv);
+                state.thinkingDiv = null;
                 if (state.botMessageDiv) {
                     appendTextToMessage(state.botMessageDiv, '\n[错误: ' + data.message + ']');
+                } else {
+                    addMessage('抱歉，出错了：' + (data.message || '请稍后重试'), 'bot');
                 }
             }
         }
 
-        function updateChatStats(messageCount, totalTokens) {
-            document.getElementById('chatStats').textContent = `消息: ${messageCount} | Tokens: ${totalTokens.toLocaleString()}`;
+        function updateChatStats(messageCount, totalTokens, messageLimit = CHAT_MESSAGE_LIMIT) {
+            document.getElementById('chatStats').textContent =
+                `消息: ${messageCount}/${messageLimit} | Tokens: ${Math.round(totalTokens).toLocaleString()}`;
+        }
+
+        function showChatLimitHint(data) {
+            const hint = document.getElementById('chatLimitHint');
+            if (!hint) return;
+            const text = data?.limitMessage || '';
+            if (!text) {
+                hideChatLimitHint();
+                return;
+            }
+            hint.textContent = text;
+            hint.className = data.limitReached ? 'chat-limit-hint danger' : 'chat-limit-hint';
+            hint.style.display = 'block';
+        }
+
+        function hideChatLimitHint() {
+            const hint = document.getElementById('chatLimitHint');
+            if (hint) hint.style.display = 'none';
+        }
+
+        function applySessionStats(data) {
+            sessionStats = {
+                messageCount: data.messageCount ?? 0,
+                totalTokens: data.totalTokens ?? 0,
+                messageLimit: data.messageLimit ?? CHAT_MESSAGE_LIMIT,
+            };
+            updateChatStats(sessionStats.messageCount, sessionStats.totalTokens, sessionStats.messageLimit);
+            updateTokenWarning(data.tokenWarning, data.tokenMessage);
+            if (data.limitWarning && data.limitMessage) {
+                showChatLimitHint(data);
+            } else if (sessionStats.messageCount >= sessionStats.messageLimit - 2) {
+                showChatLimitHint({
+                    limitWarning: true,
+                    limitMessage: `💡 提示：每轮对话最多 ${sessionStats.messageLimit} 条消息，当前 ${sessionStats.messageCount}/${sessionStats.messageLimit}。`,
+                    limitReached: sessionStats.messageCount >= sessionStats.messageLimit,
+                });
+            } else {
+                hideChatLimitHint();
+            }
+        }
+
+        function stopVoicePlayback() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'stop' }));
+            }
+            ttsTextBuffer = '';
+            ttsPendingSentences = [];
+            ttsStreamActive = false;
+            getStreamAudioPlayer().stop();
+        }
+
+        function autoPlayReplyOnce(text, botMessageDiv) {
+            const content = (text || '').trim();
+            if (!content || ttsAutoPlayDone) return;
+
+            ttsAutoPlayDone = true;
+            const sessionId = ttsSessionId;
+            stopVoicePlayback();
+            ttsSessionId = sessionId;
+            ttsAutoPlayDone = true;
+
+            const player = getStreamAudioPlayer();
+            player.reset();
+
+            const playBtn = botMessageDiv?.querySelector('.play-audio-btn');
+            if (playBtn) {
+                playBtn.classList.add('playing');
+                playBtn.textContent = '⏸️';
+                currentPlayingBtn = playBtn;
+                isPlaying = true;
+            }
+
+            ttsStreamActive = true;
+            ensureVoiceWebSocket();
+
+            const payload = {
+                type: 'start',
+                text: content,
+                token: sessionId,
+                voice_type: VOICE_SETTINGS.voice_type,
+                speed: VOICE_SETTINGS.speed,
+                volume: VOICE_SETTINGS.volume,
+            };
+
+            const trySend = () => {
+                if (sessionId !== ttsSessionId) return;
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify(payload));
+                } else if (ws && ws.readyState === WebSocket.CONNECTING) {
+                    ws.addEventListener('open', trySend, { once: true });
+                }
+            };
+            trySend();
         }
 
         function queueStreamingTTS(textChunk) {
@@ -825,9 +1150,11 @@
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === 'audio') {
+                        if (data.token != null && data.token !== ttsSessionId) return;
                         getStreamAudioPlayer().enqueueBase64(data.data);
-                        if (botMessageDivPlaying()) {
-                            const playBtn = document.querySelector('.message.bot:last-child .play-audio-btn');
+                        if (ttsStreamActive) {
+                            const playBtn = currentPlayingBtn
+                                || document.querySelector('.message.bot:last-child .play-audio-btn');
                             if (playBtn && !currentPlayingBtn) {
                                 playBtn.classList.add('playing');
                                 playBtn.textContent = '⏸️';
@@ -835,8 +1162,14 @@
                                 isPlaying = true;
                             }
                         }
+                    } else if (data.type === 'done') {
+                        if (data.token != null && data.token !== ttsSessionId) return;
                     } else if (data.type === 'error') {
                         console.error('WebSocket TTS error:', data.message);
+                        if (data.token == null || data.token === ttsSessionId) {
+                            ttsStreamActive = false;
+                            resetPlayButton();
+                        }
                     }
                 } catch (e) {
                     console.error('WebSocket message error:', e);
@@ -856,13 +1189,21 @@
 
         async function startVoiceStream(text) {
             if (!text) return;
+            ttsSessionId += 1;
+            ttsAutoPlayDone = true;
+            const sessionId = ttsSessionId;
+            stopVoicePlayback();
+            ttsSessionId = sessionId;
             getStreamAudioPlayer().reset();
             ensureVoiceWebSocket();
+            ttsStreamActive = true;
             const trySend = () => {
+                if (sessionId !== ttsSessionId) return;
                 if (ws && ws.readyState === WebSocket.OPEN) {
                     ws.send(JSON.stringify({
                         type: 'start',
                         text,
+                        token: sessionId,
                         voice_type: VOICE_SETTINGS.voice_type,
                         speed: VOICE_SETTINGS.speed,
                         volume: VOICE_SETTINGS.volume,
@@ -881,11 +1222,16 @@
             }
             stopCurrentAudio();
 
+            ttsSessionId += 1;
+            ttsAutoPlayDone = true;
+            const sessionId = ttsSessionId;
+
             try {
                 btn.classList.add('playing');
                 btn.textContent = '⏸️';
                 currentPlayingBtn = btn;
                 isPlaying = true;
+                ttsStreamActive = true;
 
                 const player = getStreamAudioPlayer();
                 player.reset();
@@ -909,6 +1255,7 @@
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
+                    if (sessionId !== ttsSessionId) break;
 
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
@@ -917,11 +1264,13 @@
                     for (const line of lines) {
                         if (!line.startsWith('data: ')) continue;
                         const data = JSON.parse(line.substring(6));
+                        if (sessionId !== ttsSessionId) return;
                         if (data.type === 'audio') {
                             player.enqueueBase64(data.data);
                         } else if (data.type === 'error') {
                             alert('语音合成失败: ' + data.message);
                             resetPlayButton();
+                            ttsStreamActive = false;
                             return;
                         } else if (data.type === 'done') {
                             player.stopped = false;
@@ -932,11 +1281,16 @@
                 console.error('TTS播放错误:', e);
                 alert('播放失败，请稍后重试');
                 resetPlayButton();
+            } finally {
+                if (sessionId === ttsSessionId) {
+                    ttsStreamActive = false;
+                }
             }
         }
 
         function stopCurrentAudio() {
-            if (streamAudioPlayer) streamAudioPlayer.stop();
+            ttsSessionId += 1;
+            stopVoicePlayback();
             resetPlayButton();
         }
 
@@ -965,7 +1319,12 @@
                     body: JSON.stringify({ keepRecent: 10 })
                 });
                 const data = await res.json();
-                if (data.success) { alert(data.message); await loadConversation(currentConvId); document.getElementById('tokenWarning').style.display = 'none'; loadStats(); }
+                if (data.success) {
+                    alert(data.message);
+                    await loadConversation(currentConvId);
+                    updateTokenWarning(false);
+                    loadStats();
+                }
                 else alert(data.message);
             } catch (e) { alert('压缩失败，请重试'); }
         }
