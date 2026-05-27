@@ -489,8 +489,9 @@ def run_production_server():
         'web_app:app',
         '--bind', f'0.0.0.0:{port}',
         '--workers', '1',
-        '--threads', '4',
+        '--threads', '2',
         '--timeout', '120',
+        '--max-requests', '500',
         '--access-logfile', '-',
         '--error-logfile', '-',
     ]

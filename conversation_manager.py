@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 
 TOKEN_LIMIT = 100000
 MESSAGE_LIMIT = 10
+MAX_CONVERSATIONS = 20
 
 
 class ConversationManager:
@@ -22,8 +23,19 @@ class ConversationManager:
                 print(f"加载对话历史失败: {e}")
                 self.conversations = {}
     
+    def _prune_old_conversations(self):
+        if len(self.conversations) <= MAX_CONVERSATIONS:
+            return
+        sorted_ids = sorted(
+            self.conversations.keys(),
+            key=lambda cid: self.conversations[cid].get('last_updated', 0),
+        )
+        for cid in sorted_ids[: len(self.conversations) - MAX_CONVERSATIONS]:
+            del self.conversations[cid]
+
     def _save_history(self):
         try:
+            self._prune_old_conversations()
             with open(self.history_file, 'w', encoding='utf-8') as f:
                 json.dump(self.conversations, f, ensure_ascii=False, indent=2)
         except Exception as e:

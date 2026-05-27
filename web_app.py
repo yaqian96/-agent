@@ -1,8 +1,6 @@
 import os
-import sys
 import json
 import base64
-import urllib.request
 
 import env_config  # noqa: F401  加载 .env
 from env_config import is_tencent_configured
@@ -10,44 +8,11 @@ from flask import Flask, render_template, request, jsonify, Response, stream_wit
 from flask_sock import Sock
 from weather_api import fetch_weather_data, get_mock_weather_data
 from analyzer import analyze_weather
-from outfit_recommender import recommend_outfit
 from conversation_manager import get_conversation_manager
-from tts_service import synthesize_speech, get_voice_types, get_tts_service
-from asr_service import recognize_speech
-from streaming_tts import synthesize_speech_stream_base64, synthesize_speech_sentences_stream
+from location_service import get_city_from_ip, get_city_from_coords, DEFAULT_CITY
 
 app = Flask(__name__)
 sock = Sock(app)
-
-IP_API_URL = "http://ip-api.com/json/"
-OPEN_METEO_GEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
-
-CITY_KEYWORDS = {
-    "北京": "北京", "beijing": "北京", "bj": "北京",
-    "上海": "上海", "shanghai": "上海", "sh": "上海",
-    "广州": "广州", "guangzhou": "广州", "gz": "广州",
-    "深圳": "深圳", "shenzhen": "深圳", "sz": "深圳",
-    "杭州": "杭州", "hangzhou": "杭州", "hz": "杭州",
-    "成都": "成都", "chengdu": "成都", "cd": "成都",
-    "武汉": "武汉", "wuhan": "武汉", "wh": "武汉",
-    "西安": "西安", "xian": "西安", "xa": "西安",
-    "重庆": "重庆", "chongqing": "重庆", "cq": "重庆",
-    "南京": "南京", "nanjing": "南京", "nj": "南京",
-    "天津": "天津", "tianjin": "天津", "tj": "天津",
-    "苏州": "苏州", "suzhou": "苏州", "sz": "苏州",
-    "郑州": "郑州", "zhengzhou": "郑州", "zz": "郑州",
-    "长沙": "长沙", "changsha": "长沙", "cs": "长沙",
-    "青岛": "青岛", "qingdao": "青岛", "qd": "青岛",
-    "沈阳": "沈阳", "shenyang": "沈阳", "sy": "沈阳",
-    "大连": "大连", "dalian": "大连", "dl": "大连",
-    "厦门": "厦门", "xiamen": "厦门", "xm": "厦门",
-    "宁波": "宁波", "ningbo": "宁波", "nb": "宁波",
-    "昆明": "昆明", "kunming": "昆明", "km": "昆明",
-}
-
-
-from location_service import get_city_from_ip, get_city_from_coords, DEFAULT_CITY
-from chat_handler import process_chat_message, stream_chat_message
 
 
 def get_weather_for_city(city_name):
@@ -189,6 +154,7 @@ def chat():
         })
 
     cm.add_message(conv_id, 'user', message)
+    from chat_handler import process_chat_message
     reply = process_chat_message(message, city_data)
     cm.add_message(conv_id, 'bot', reply)
 
@@ -247,6 +213,7 @@ def chat_stream():
             yield f"data: {json.dumps({'type': 'status', 'status': 'thinking'}, ensure_ascii=False)}\n\n"
 
             reply_parts = []
+            from chat_handler import stream_chat_message
             for chunk in stream_chat_message(message, city_data):
                 reply_parts.append(chunk)
                 yield f"data: {json.dumps({'type': 'text', 'content': chunk}, ensure_ascii=False)}\n\n"
@@ -304,6 +271,7 @@ def asr_stream():
 
             yield f"data: {json.dumps({'type': 'start'})}\n\n"
 
+            from asr_service import recognize_speech
             result = recognize_speech(audio_data, format)
 
             if not result.get('success'):
@@ -343,7 +311,8 @@ def asr_api():
         
         if not audio_data:
             return jsonify({"success": False, "error": "没有收到音频数据"}), 400
-        
+
+        from asr_service import recognize_speech
         result = recognize_speech(audio_data, format)
         
         if result['success']:
@@ -373,7 +342,8 @@ def tts_api():
         
         if not text:
             return jsonify({"error": "请提供要转换的文本"}), 400
-        
+
+        from tts_service import synthesize_speech
         result = synthesize_speech(text, voice_type, speed, volume)
         
         if result['success']:
@@ -412,6 +382,8 @@ def tts_stream():
 
     if not text:
         return jsonify({'error': '请提供要转换的文本'}), 400
+
+    from streaming_tts import synthesize_speech_stream_base64, synthesize_speech_sentences_stream
 
     if stream_mode == 'sse' or request.method == 'POST':
         def generate_sse():
@@ -461,6 +433,8 @@ def tts_stream():
 
 @sock.route('/ws/voice')
 def websocket_voice(ws):
+    from streaming_tts import synthesize_speech_sentences_stream
+
     print('WebSocket voice connection established')
 
     try:
@@ -546,6 +520,7 @@ def websocket_voice(ws):
 
 @app.route('/api/tts/voices', methods=['GET'])
 def tts_voices():
+    from tts_service import get_voice_types
     return jsonify(get_voice_types())
 
 
@@ -616,6 +591,7 @@ def create_conversation():
 
 @app.route('/api/health', methods=['GET'])
 def health():
+    from tts_service import get_voice_types
     return jsonify({
         'status': 'ok',
         'tts_configured': is_tencent_configured(),

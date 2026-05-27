@@ -2,11 +2,13 @@ services:
   - type: web
     name: weather-outfit-agent
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app
+    buildCommand: pip install -r requirements-prod.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 --max-requests 500 web_app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
+      - key: PYTHONDONTWRITEBYTECODE
+        value: '1'
       - key: WEB_CONCURRENCY
         value: '1'
       - key: ZHIPU_API_KEY

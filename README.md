@@ -105,7 +105,11 @@ weather_outfit_agent/
 
 ```bash
 cd weather_outfit_agent
-pip install -r requirements.txt
+# 生产 / Render 部署（轻量，约 150–250MB）
+pip install -r requirements-prod.txt
+
+# 本地完整开发（含 ChromaDB、matplotlib 等）
+pip install -r requirements-dev.txt
 ```
 
 ### 设置环境变量
@@ -359,17 +363,17 @@ sequenceDiagram
 
 1. Fork 本仓库
 2. 在 Render 上创建 Web Service（可使用 `render.yaml`）
-3. **Start Command**（必须与下面一致，Dashboard 会覆盖 `render.yaml`）：
+3. **Build Command**：`pip install -r requirements-prod.txt`（勿装 chromadb / sentence-transformers，否则超 512MB）
+4. **Start Command**：
    ```bash
-   gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app
+   gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 --max-requests 500 web_app:app
    ```
-   若仍配置为 `python web_server.py`，代码会自动转发到 gunicorn，但建议直接改为上式。
-4. 在 Render 控制台设置环境变量（勿写入代码）：
-   - `ZHIPU_API_KEY`（必需）
-   - `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` / `TENCENT_APP_ID`（可选，语音功能）
-5. 本地开发热重载：`FLASK_DEBUG=1 python web_app.py`
+5. 在 Render 控制台设置环境变量：`ZHIPU_API_KEY`（必需），腾讯云密钥（可选）
+6. **Clear build cache & deploy** 重新部署
 
-**常见错误 `No open ports detected`**：Start Command 仍为旧版 `python web_server.py` 且进程在 import 阶段卡住/OOM，未监听 `$PORT`。请改用上方的 gunicorn 命令后重新部署。
+**常见错误：**
+- `No open ports detected` → Start Command 未用 gunicorn
+- `Ran out of memory (512MB)` → Build 用了完整 `requirements.txt`，请改 `requirements-prod.txt`
 
 ### 本地开发
 
