@@ -2,8 +2,10 @@ import os
 import base64
 import subprocess
 import tempfile
-import env_config  # noqa: F401  加载 .env
-from env_config import get_int_env, tencent_config_error
+import app_env  # noqa: F401  加载 .env
+from app_env import get_env, get_int_env, is_tencent_configured, tencent_config_error
+
+MIN_PCM_BYTES = 16000  # 16kHz * 16bit * 0.5s
 from tencentcloud.common import credential
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
@@ -13,8 +15,8 @@ from tencentcloud.asr.v20190614 import asr_client, models
 
 class ASRService:
     def __init__(self, secret_id=None, secret_key=None):
-        self.secret_id = secret_id or env_config.get_env('TENCENT_SECRET_ID')
-        self.secret_key = secret_key or env_config.get_env('TENCENT_SECRET_KEY')
+        self.secret_id = secret_id or get_env('TENCENT_SECRET_ID')
+        self.secret_key = secret_key or get_env('TENCENT_SECRET_KEY')
         self.appid = get_int_env('TENCENT_APP_ID', 0)
 
     def _create_client(self):
@@ -97,10 +99,18 @@ class ASRService:
             req.EngSerViceType = '16k_zh'
 
             resp = client.SentenceRecognition(req)
+            text = (resp.Result or '').strip()
+
+            if not text:
+                return {
+                    'success': False,
+                    'error': '未识别到语音内容，请靠近麦克风并清晰说话后重试',
+                    'request_id': resp.RequestId,
+                }
 
             return {
                 'success': True,
-                'text': resp.Result,
+                'text': text,
                 'request_id': resp.RequestId,
             }
 
@@ -118,6 +128,9 @@ class ASRService:
 
         if len(audio_data) < 100:
             return {'success': False, 'error': '录音时间太短，请重新录制'}
+
+        if format.lower() == 'pcm' and len(audio_data) < MIN_PCM_BYTES:
+            return {'success': False, 'error': '录音太短，请至少说 1 秒'}
 
         return self._recognize_with_tencent(audio_data, format)
 

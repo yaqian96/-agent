@@ -2,8 +2,8 @@ import os
 import json
 import base64
 
-import env_config  # noqa: F401  加载 .env
-from env_config import is_tencent_configured, is_zhipu_configured, log_startup_config
+import app_env  # noqa: F401  加载 .env
+from app_env import is_tencent_configured, is_zhipu_configured, log_startup_config
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_sock import Sock
 from weather_api import fetch_weather_data, get_mock_weather_data
@@ -308,7 +308,7 @@ def asr_api():
         else:
             audio_data = audio_file.read()
         
-        format = request.form.get('format', 'mp3')
+        format = request.form.get('format', 'pcm')
         
         if not audio_data:
             return jsonify({"success": False, "error": "没有收到音频数据"}), 400
@@ -434,27 +434,32 @@ def tts_stream():
 
 @sock.route('/ws/voice')
 def websocket_voice(ws):
-    from streaming_tts import synthesize_speech_sentences_stream
+    from streaming_tts import synthesize_speech_sentences_stream, sanitize_tts_text
+    from app_env import safe_print
 
-    print('WebSocket voice connection established')
+    safe_print('WebSocket voice connection established')
 
     try:
         while True:
             message = ws.receive()
-            print(f'Received WebSocket message: {message[:100]}...')
+            safe_print(f'Received WebSocket message ({len(message)} bytes)')
 
             data = json.loads(message)
             msg_type = data.get('type')
 
             if msg_type == 'start':
-                text = data.get('text', '')
+                text = sanitize_tts_text(data.get('text', ''))
                 voice_type = data.get('voice_type')
                 speed = data.get('speed')
                 volume = data.get('volume')
                 token = data.get('token')
 
-                print(f'Starting streaming TTS for text: {text[:50]}...')
-                ws.send(json.dumps({'type': 'start', 'token': token}))
+                if not text:
+                    ws.send(json.dumps({'type': 'done', 'token': token}, ensure_ascii=False))
+                    continue
+
+                safe_print(f'Starting streaming TTS, length={len(text)}')
+                ws.send(json.dumps({'type': 'start', 'token': token}, ensure_ascii=False))
 
                 for item in synthesize_speech_sentences_stream(text, voice_type, speed, volume):
                     if item['success']:
@@ -464,20 +469,20 @@ def websocket_voice(ws):
                             'text': item['text'],
                             'data': item['audio_base64'],
                             'token': token,
-                        }))
+                        }, ensure_ascii=False))
                     else:
                         ws.send(json.dumps({
                             'type': 'error',
                             'message': item.get('error', 'TTS合成失败'),
                             'token': token,
-                        }))
+                        }, ensure_ascii=False))
                         break
 
-                ws.send(json.dumps({'type': 'done', 'token': token}))
-                print('TTS streaming completed')
+                ws.send(json.dumps({'type': 'done', 'token': token}, ensure_ascii=False))
+                safe_print('TTS streaming completed')
 
             elif msg_type == 'sentence':
-                text = data.get('text', '').strip()
+                text = sanitize_tts_text(data.get('text', ''))
                 voice_type = data.get('voice_type')
                 speed = data.get('speed')
                 volume = data.get('volume')
@@ -487,34 +492,42 @@ def websocket_voice(ws):
                 if not text:
                     continue
 
-                for item in synthesize_speech_sentences_stream(text, voice_type, speed, volume):
-                    if item['success']:
-                        ws.send(json.dumps({
-                            'type': 'audio',
-                            'index': index,
-                            'text': item['text'],
-                            'data': item['audio_base64'],
-                            'token': token,
-                        }))
-                    else:
-                        ws.send(json.dumps({
-                            'type': 'error',
-                            'message': item.get('error', 'TTS合成失败'),
-                            'token': token,
-                        }))
-                        break
+                try:
+                    for item in synthesize_speech_sentences_stream(text, voice_type, speed, volume):
+                        if item['success']:
+                            ws.send(json.dumps({
+                                'type': 'audio',
+                                'index': index,
+                                'text': item['text'],
+                                'data': item['audio_base64'],
+                                'token': token,
+                            }, ensure_ascii=False))
+                        else:
+                            ws.send(json.dumps({
+                                'type': 'error',
+                                'message': item.get('error', 'TTS合成失败'),
+                                'token': token,
+                            }, ensure_ascii=False))
+                            break
+                except Exception as exc:
+                    safe_print(f'TTS sentence error: {exc}')
+                    ws.send(json.dumps({
+                        'type': 'error',
+                        'message': str(exc),
+                        'token': token,
+                    }, ensure_ascii=False))
 
             elif msg_type == 'end':
                 token = data.get('token')
-                ws.send(json.dumps({'type': 'done', 'token': token}))
+                ws.send(json.dumps({'type': 'done', 'token': token}, ensure_ascii=False))
 
             elif msg_type == 'stop':
-                ws.send(json.dumps({'type': 'stopped'}))
+                ws.send(json.dumps({'type': 'stopped'}, ensure_ascii=False))
 
     except Exception as e:
-        print(f'WebSocket error: {e}')
+        safe_print(f'WebSocket error: {e}')
         try:
-            ws.send(json.dumps({'type': 'error', 'message': str(e)}))
+            ws.send(json.dumps({'type': 'error', 'message': str(e)}, ensure_ascii=False))
         except Exception:
             pass
 
@@ -622,4 +635,4 @@ if __name__ == '__main__':
         print('  Render：在 Environment 中设置 ZHIPU_API_KEY')
     print('=' * 50)
 
-    app.run(host='0.0.0.0', port=port, debug=debug, threaded=True)
+    app.run(host='0.0.0.0', port=port, debug=debug, threaded=True, use_reloader=False)

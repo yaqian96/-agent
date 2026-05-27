@@ -1,5 +1,6 @@
-import env_config  # noqa: F401
-from env_config import get_int_env, is_tencent_configured, tencent_config_error
+import app_env  # noqa: F401
+from app_env import get_env, get_int_env, is_tencent_configured, tencent_config_error
+from streaming_tts import sanitize_tts_text
 import json
 import base64
 import hashlib
@@ -12,8 +13,8 @@ from tencentcloud.tts.v20190823 import tts_client, models
 
 class TTSService:
     def __init__(self, secret_id=None, secret_key=None, app_id=None):
-        self.secret_id = secret_id or env_config.get_env('TENCENT_SECRET_ID')
-        self.secret_key = secret_key or env_config.get_env('TENCENT_SECRET_KEY')
+        self.secret_id = secret_id or get_env('TENCENT_SECRET_ID')
+        self.secret_key = secret_key or get_env('TENCENT_SECRET_KEY')
         self.app_id = app_id if app_id is not None else get_int_env('TENCENT_APP_ID', 0)
         
         self.voice_type = 101007
@@ -35,6 +36,9 @@ class TTSService:
         return client
     
     def synthesize(self, text, voice_type=None, speed=None, volume=None):
+        text = sanitize_tts_text(text)
+        if not text:
+            return {'success': False, 'error': 'TTS text is empty after sanitization'}
         if not is_tencent_configured():
             return {'success': False, 'error': tencent_config_error()}
         try:

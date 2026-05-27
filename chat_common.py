@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from env_config import get_env
+from app_env import get_env
 
 LLM_UNAVAILABLE_REPLY = '大模型暂不可用，请稍后重试'
 

@@ -325,10 +325,12 @@
         let sessionStats = { messageCount: 0, totalTokens: 0, messageLimit: CHAT_MESSAGE_LIMIT };
         let chatBusy = false;
         let isRecording = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let audioContext = null;
+        let pcmRecordProcessor = null;
+        let pcmRecordChunks = [];
+        let pcmRecordContext = null;
         let recordingStream = null;
+        let recordingStartedAt = 0;
+        const MIN_RECORD_MS = 1000;
         let ws = null;
         let isPlaying = false;
         let currentPlayingBtn = null;
@@ -621,23 +623,31 @@
 
         async function startRecording() {
             try {
-                recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioChunks = [];
+                recordingStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        channelCount: 1,
+                    },
+                });
 
-                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                    ? 'audio/webm;codecs=opus'
-                    : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
+                pcmRecordContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = pcmRecordContext.createMediaStreamSource(recordingStream);
+                pcmRecordChunks = [];
+                recordingStartedAt = Date.now();
+                isRecording = true;
 
-                mediaRecorder = mimeType
-                    ? new MediaRecorder(recordingStream, { mimeType })
-                    : new MediaRecorder(recordingStream);
-
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) audioChunks.push(e.data);
+                pcmRecordProcessor = pcmRecordContext.createScriptProcessor(4096, 1, 1);
+                pcmRecordProcessor.onaudioprocess = (event) => {
+                    if (!isRecording) return;
+                    pcmRecordChunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
                 };
 
-                mediaRecorder.start(250);
-                isRecording = true;
+                const silentGain = pcmRecordContext.createGain();
+                silentGain.gain.value = 0;
+                source.connect(pcmRecordProcessor);
+                pcmRecordProcessor.connect(silentGain);
+                silentGain.connect(pcmRecordContext.destination);
 
                 document.getElementById('voiceInputBtn').classList.add('recording');
                 document.getElementById('voiceInputBtn').textContent = '🔴';
@@ -650,32 +660,85 @@
         }
 
         function stopRecording() {
-            if (!isRecording || !mediaRecorder) return;
+            if (!isRecording) return;
+            isRecording = false;
 
-            mediaRecorder.onstop = () => {
-                if (recordingStream) {
-                    recordingStream.getTracks().forEach(track => track.stop());
-                    recordingStream = null;
+            if (pcmRecordProcessor) {
+                pcmRecordProcessor.disconnect();
+                pcmRecordProcessor.onaudioprocess = null;
+                pcmRecordProcessor = null;
+            }
+
+            document.getElementById('voiceInputBtn').classList.remove('recording');
+            document.getElementById('voiceInputBtn').textContent = '🎤';
+            document.getElementById('recordingIndicator').classList.remove('active');
+
+            const durationMs = Date.now() - recordingStartedAt;
+
+            if (recordingStream) {
+                recordingStream.getTracks().forEach(track => track.stop());
+                recordingStream = null;
+            }
+
+            if (durationMs < MIN_RECORD_MS) {
+                alert('录音太短，请至少说 1 秒');
+                cleanupRecordingContext();
+                pcmRecordChunks = [];
+                return;
+            }
+
+            if (pcmRecordChunks.length === 0) {
+                alert('未采集到音频，请重试');
+                cleanupRecordingContext();
+                return;
+            }
+
+            uploadAndRecognize();
+        }
+
+        function cleanupRecordingContext() {
+            if (pcmRecordContext) {
+                pcmRecordContext.close().catch(() => {});
+                pcmRecordContext = null;
+            }
+        }
+
+        function build16kPcmBlob(chunks, sourceSampleRate) {
+            let totalLength = 0;
+            for (const chunk of chunks) totalLength += chunk.length;
+
+            const merged = new Float32Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+                merged.set(chunk, offset);
+                offset += chunk.length;
+            }
+
+            const targetRate = 16000;
+            let pcmFloat = merged;
+            if (Math.abs(sourceSampleRate - targetRate) > 1) {
+                const newLength = Math.max(1, Math.round(merged.length * targetRate / sourceSampleRate));
+                pcmFloat = new Float32Array(newLength);
+                for (let i = 0; i < newLength; i++) {
+                    const srcIndex = i * sourceSampleRate / targetRate;
+                    const idx = Math.floor(srcIndex);
+                    const frac = srcIndex - idx;
+                    const s0 = merged[idx] || 0;
+                    const s1 = merged[Math.min(idx + 1, merged.length - 1)] || 0;
+                    pcmFloat[i] = s0 + (s1 - s0) * frac;
                 }
-                mediaRecorder = null;
-                isRecording = false;
+            }
 
-                document.getElementById('voiceInputBtn').classList.remove('recording');
-                document.getElementById('voiceInputBtn').textContent = '🎤';
-                document.getElementById('recordingIndicator').classList.remove('active');
+            const pcmData = new Int16Array(pcmFloat.length);
+            for (let i = 0; i < pcmFloat.length; i++) {
+                const sample = Math.max(-1, Math.min(1, pcmFloat[i]));
+                pcmData[i] = sample < 0 ? Math.round(sample * 32768) : Math.round(sample * 32767);
+            }
 
-                uploadAndRecognize();
-            };
-
-            mediaRecorder.stop();
+            return new Blob([pcmData.buffer], { type: 'audio/pcm' });
         }
 
         async function uploadAndRecognize() {
-            if (audioChunks.length === 0) return;
-
-            const audioBlob = new Blob(audioChunks, { type: audioChunks[0].type || 'audio/webm' });
-            audioChunks = [];
-
             const chatInput = document.getElementById('chatInput');
             const voiceBtn = document.getElementById('voiceInputBtn');
             chatInput.classList.add('recognizing');
@@ -683,7 +746,16 @@
             voiceBtn.classList.add('disabled');
 
             try {
-                const pcmBlob = await convertTo16kPcm(audioBlob);
+                const sourceRate = pcmRecordContext ? pcmRecordContext.sampleRate : 16000;
+                const pcmBlob = build16kPcmBlob(pcmRecordChunks, sourceRate);
+                pcmRecordChunks = [];
+                cleanupRecordingContext();
+
+                if (pcmBlob.size < 16000) {
+                    alert('录音太短，请至少说 1 秒');
+                    return;
+                }
+
                 const fd = new FormData();
                 fd.append('file', pcmBlob, 'recording.pcm');
                 fd.append('format', 'pcm');
@@ -695,11 +767,11 @@
 
                 const data = await response.json();
 
-                if (data.success && data.text) {
+                if (data.success && data.text && data.text.trim()) {
                     chatInput.value = '';
                     await sendChatStream(data.text.trim());
                 } else {
-                    alert('语音识别失败: ' + (data.error || '未知错误'));
+                    alert('语音识别失败: ' + (data.error || '未识别到内容，请靠近麦克风重试'));
                 }
             } catch (e) {
                 console.error('语音识别失败:', e);
@@ -709,31 +781,6 @@
                 chatInput.placeholder = '问我任何关于天气和穿搭的问题...';
                 voiceBtn.classList.remove('disabled');
             }
-        }
-
-        async function convertTo16kPcm(blob) {
-            const arrayBuffer = await blob.arrayBuffer();
-            const decodeContext = new (window.AudioContext || window.webkitAudioContext)();
-            const audioBuffer = await decodeContext.decodeAudioData(arrayBuffer.slice(0));
-            await decodeContext.close();
-
-            const targetSampleRate = 16000;
-            const offlineContext = new OfflineAudioContext(1, Math.ceil(audioBuffer.duration * targetSampleRate), targetSampleRate);
-            const source = offlineContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(offlineContext.destination);
-            source.start(0);
-
-            const rendered = await offlineContext.startRendering();
-            const channelData = rendered.getChannelData(0);
-            const pcmData = new Int16Array(channelData.length);
-
-            for (let i = 0; i < channelData.length; i++) {
-                const sample = Math.max(-1, Math.min(1, channelData[i]));
-                pcmData[i] = sample < 0 ? sample * 32768 : sample * 32767;
-            }
-
-            return new Blob([pcmData.buffer], { type: 'audio/pcm' });
         }
 
         function isWeatherQuestion(text) {
@@ -830,7 +877,7 @@
                 }
             }
 
-            const state = { botMessageDiv: null, thinkingDiv: null, fullReply: '' };
+            const state = { botMessageDiv: null, thinkingDiv: null, fullReply: '', ttsStarted: false };
             setChatBusy(true);
             state.thinkingDiv = addThinkingMessage();
 
@@ -945,8 +992,13 @@
                         state.botMessageDiv = addStreamingMessage('bot');
                     }
                 }
+                if (!state.ttsStarted) {
+                    startStreamingTtsForReply(state.botMessageDiv);
+                    state.ttsStarted = true;
+                }
                 state.fullReply += data.content;
                 appendTextToMessage(state.botMessageDiv, data.content);
+                queueStreamingTTS(data.content);
                 await waitNextFrame();
             } else if (data.type === 'limit') {
                 removeThinkingMessage(state.thinkingDiv);
@@ -964,7 +1016,11 @@
                 currentConvId = data.convId || currentConvId;
                 if (state.botMessageDiv) {
                     finalizeMessage(state.botMessageDiv, state.fullReply);
-                    autoPlayReplyOnce(state.fullReply, state.botMessageDiv);
+                    if (state.ttsStarted) {
+                        flushStreamingTTS(true);
+                    } else if (state.fullReply.trim()) {
+                        autoPlayReplyOnce(state.fullReply, state.botMessageDiv);
+                    }
                 }
                 applySessionStats({
                     messageCount: data.messageCount ?? sessionStats.messageCount,
@@ -978,6 +1034,7 @@
                 loadStats();
             } else if (data.type === 'error') {
                 console.error('Stream error:', data.message);
+                if (state.ttsStarted) stopVoicePlayback();
                 removeThinkingMessage(state.thinkingDiv);
                 state.thinkingDiv = null;
                 if (state.botMessageDiv) {
@@ -1042,6 +1099,26 @@
             getStreamAudioPlayer().stop();
         }
 
+        function startStreamingTtsForReply(botMessageDiv) {
+            ttsTextBuffer = '';
+            ttsSentenceIndex = 0;
+            ttsPendingSentences = [];
+            ttsAutoPlayDone = true;
+
+            getStreamAudioPlayer().reset();
+            ttsStreamActive = true;
+            ensureVoiceWebSocket();
+
+            const playBtn = botMessageDiv?.querySelector('.play-audio-btn');
+            if (playBtn) {
+                playBtn.style.opacity = '0.7';
+                playBtn.classList.add('playing');
+                playBtn.textContent = '⏸️';
+                currentPlayingBtn = playBtn;
+                isPlaying = true;
+            }
+        }
+
         function autoPlayReplyOnce(text, botMessageDiv) {
             const content = (text || '').trim();
             if (!content || ttsAutoPlayDone) return;
@@ -1100,13 +1177,18 @@
                 sendTtsSentence(sentence);
             }
 
+            if (!force && ttsTextBuffer.length >= 36) {
+                sendTtsSentence(ttsTextBuffer.slice(0, 36));
+                ttsTextBuffer = ttsTextBuffer.slice(36);
+            }
+
             if (force && ttsTextBuffer.trim()) {
                 sendTtsSentence(ttsTextBuffer.trim());
                 ttsTextBuffer = '';
             }
 
             if (force && ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'end' }));
+                ws.send(JSON.stringify({ type: 'end', token: ttsSessionId }));
             }
         }
 
@@ -1125,6 +1207,7 @@
                     type: 'sentence',
                     text: sentence,
                     index: ttsSentenceIndex++,
+                    token: ttsSessionId,
                     voice_type: VOICE_SETTINGS.voice_type,
                     speed: VOICE_SETTINGS.speed,
                     volume: VOICE_SETTINGS.volume,

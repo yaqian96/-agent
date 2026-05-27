@@ -1,5 +1,5 @@
-import env_config  # noqa: F401
-from env_config import get_int_env, is_tencent_configured, tencent_config_error
+import app_env  # noqa: F401
+from app_env import get_env, get_int_env, is_tencent_configured, tencent_config_error
 import re
 import base64
 import time
@@ -10,8 +10,25 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentClo
 from tencentcloud.tts.v20190823 import tts_client, models
 
 
+_EMOJI_RE = re.compile(
+    '['
+    '\U0001F300-\U0001FAFF'
+    '\U00002700-\U000027BF'
+    '\U0001F000-\U0001F02F'
+    '\uFE0F'
+    ']+',
+    flags=re.UNICODE,
+)
+
+
+def sanitize_tts_text(text: str) -> str:
+    cleaned = _EMOJI_RE.sub('', text or '')
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned
+
+
 def split_text_to_sentences(text):
-    text = (text or '').strip()
+    text = sanitize_tts_text(text)
     if not text:
         return []
 
@@ -40,8 +57,8 @@ def split_text_to_sentences(text):
 
 class StreamingTTSService:
     def __init__(self, secret_id=None, secret_key=None, app_id=None):
-        self.secret_id = secret_id or env_config.get_env('TENCENT_SECRET_ID')
-        self.secret_key = secret_key or env_config.get_env('TENCENT_SECRET_KEY')
+        self.secret_id = secret_id or get_env('TENCENT_SECRET_ID')
+        self.secret_key = secret_key or get_env('TENCENT_SECRET_KEY')
         self.appid = app_id if app_id is not None else get_int_env('TENCENT_APP_ID', 0)
 
         self.voice_type = 101007
@@ -63,6 +80,9 @@ class StreamingTTSService:
         return tts_client.TtsClient(cred, '', client_profile)
 
     def synthesize(self, text, voice_type=None, speed=None, volume=None):
+        text = sanitize_tts_text(text)
+        if not text:
+            return {'success': False, 'error': 'TTS text is empty after sanitization'}
         if not is_tencent_configured():
             return {'success': False, 'error': tencent_config_error()}
         try:
