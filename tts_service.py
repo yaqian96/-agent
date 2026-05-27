@@ -1,6 +1,5 @@
 import env_config  # noqa: F401
-from env_config import tencent_config_error
-import os
+from env_config import get_int_env, is_tencent_configured, tencent_config_error
 import json
 import base64
 import hashlib
@@ -13,9 +12,9 @@ from tencentcloud.tts.v20190823 import tts_client, models
 
 class TTSService:
     def __init__(self, secret_id=None, secret_key=None, app_id=None):
-        self.secret_id = secret_id or os.environ.get('TENCENT_SECRET_ID')
-        self.secret_key = secret_key or os.environ.get('TENCENT_SECRET_KEY')
-        self.app_id = app_id or int(os.environ.get('TENCENT_APP_ID', '0'))
+        self.secret_id = secret_id or env_config.get_env('TENCENT_SECRET_ID')
+        self.secret_key = secret_key or env_config.get_env('TENCENT_SECRET_KEY')
+        self.app_id = app_id if app_id is not None else get_int_env('TENCENT_APP_ID', 0)
         
         self.voice_type = 101007
         self.speed = 1.0
@@ -23,6 +22,8 @@ class TTSService:
         self.codec = 'mp3'
         
     def _create_client(self):
+        if not is_tencent_configured():
+            return None
         cred = credential.Credential(self.secret_id, self.secret_key)
         http_profile = HttpProfile()
         http_profile.endpoint = "tts.tencentcloudapi.com"
@@ -34,6 +35,8 @@ class TTSService:
         return client
     
     def synthesize(self, text, voice_type=None, speed=None, volume=None):
+        if not is_tencent_configured():
+            return {'success': False, 'error': tencent_config_error()}
         try:
             req = models.TextToVoiceRequest()
             req.Text = text
@@ -44,6 +47,8 @@ class TTSService:
             req.Codec = self.codec
             
             client = self._create_client()
+            if not client:
+                return {'success': False, 'error': tencent_config_error()}
             resp = client.TextToVoice(req)
             
             if resp.Audio:

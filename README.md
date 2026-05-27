@@ -368,8 +368,12 @@ sequenceDiagram
    ```bash
    gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 --max-requests 500 web_app:app
    ```
-5. 在 Render 控制台设置环境变量：`ZHIPU_API_KEY`（必需），腾讯云密钥（可选）
+5. 在 Render 控制台设置环境变量（**不需要 .env 文件**）：
+   - `ZHIPU_API_KEY`（必需，AI 对话）
+   - `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` / `TENCENT_APP_ID`（可选，语音）
 6. **Clear build cache & deploy** 重新部署
+
+访问 `/api/health` 可检查 `llm_configured` / `tts_configured` 是否为 `true`。
 
 **常见错误：**
 - `No open ports detected` → Start Command 未用 gunicorn

@@ -7,6 +7,24 @@ except ImportError:
     load_dotenv = None
 
 
+def get_env(name: str, default: str = '') -> str:
+    return (os.environ.get(name) or default).strip()
+
+
+def get_int_env(name: str, default: int = 0) -> int:
+    raw = get_env(name)
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def is_production() -> bool:
+    return bool(get_env('RENDER') or get_env('PORT'))
+
+
 def load_env():
     if load_dotenv is None:
         return
@@ -20,9 +38,9 @@ load_env()
 
 def get_tencent_credentials():
     return (
-        (os.environ.get('TENCENT_SECRET_ID') or '').strip(),
-        (os.environ.get('TENCENT_SECRET_KEY') or '').strip(),
-        (os.environ.get('TENCENT_APP_ID') or '0').strip(),
+        get_env('TENCENT_SECRET_ID'),
+        get_env('TENCENT_SECRET_KEY'),
+        get_env('TENCENT_APP_ID') or '0',
     )
 
 
@@ -31,9 +49,30 @@ def is_tencent_configured():
     return bool(secret_id and secret_key)
 
 
+def is_zhipu_configured():
+    return bool(get_env('ZHIPU_API_KEY'))
+
+
 def tencent_config_error():
+    if is_production() or not (Path(__file__).resolve().parent / '.env').exists():
+        return (
+            '语音服务未配置。请在 Render 控制台 Environment 中设置 '
+            'TENCENT_SECRET_ID、TENCENT_SECRET_KEY、TENCENT_APP_ID（可选）。'
+        )
     return (
-        '语音识别服务未配置。请在项目目录创建 .env 文件并设置 '
-        'TENCENT_SECRET_ID、TENCENT_SECRET_KEY、TENCENT_APP_ID，'
-        '参考 .env.example'
+        '语音服务未配置。请在项目目录创建 .env 并设置 '
+        'TENCENT_SECRET_ID、TENCENT_SECRET_KEY、TENCENT_APP_ID，参考 .env.example'
     )
+
+
+def zhipu_config_error():
+    if is_production() or not (Path(__file__).resolve().parent / '.env').exists():
+        return '大模型未配置。请在 Render 控制台 Environment 中设置 ZHIPU_API_KEY。'
+    return '大模型未配置。请在 .env 中设置 ZHIPU_API_KEY，参考 .env.example'
+
+
+def log_startup_config():
+    print(f"[config] ZHIPU_API_KEY: {'set' if is_zhipu_configured() else 'missing'}")
+    print(f"[config] Tencent voice: {'configured' if is_tencent_configured() else 'not set (optional)'}")
+    if is_production():
+        print('[config] Running on cloud — use platform Environment variables, not .env file')

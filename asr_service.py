@@ -3,7 +3,7 @@ import base64
 import subprocess
 import tempfile
 import env_config  # noqa: F401  加载 .env
-from env_config import tencent_config_error
+from env_config import get_int_env, tencent_config_error
 from tencentcloud.common import credential
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
@@ -13,9 +13,9 @@ from tencentcloud.asr.v20190614 import asr_client, models
 
 class ASRService:
     def __init__(self, secret_id=None, secret_key=None):
-        self.secret_id = secret_id or os.environ.get('TENCENT_SECRET_ID')
-        self.secret_key = secret_key or os.environ.get('TENCENT_SECRET_KEY')
-        self.appid = int(os.environ.get('TENCENT_APP_ID', '0'))
+        self.secret_id = secret_id or env_config.get_env('TENCENT_SECRET_ID')
+        self.secret_key = secret_key or env_config.get_env('TENCENT_SECRET_KEY')
+        self.appid = get_int_env('TENCENT_APP_ID', 0)
 
     def _create_client(self):
         if not self.secret_id or not self.secret_key:

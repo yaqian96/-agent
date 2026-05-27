@@ -1,7 +1,6 @@
-import os
 from typing import Any, Dict, Optional
 
-import env_config  # noqa: F401
+from env_config import get_env
 
 LLM_UNAVAILABLE_REPLY = '大模型暂不可用，请稍后重试'
 
@@ -65,7 +64,7 @@ def get_llm():
     if _llm is not None:
         return _llm
 
-    api_key = os.environ.get('ZHIPU_API_KEY')
+    api_key = get_env('ZHIPU_API_KEY')
     if not api_key:
         return None
 

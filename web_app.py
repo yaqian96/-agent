@@ -3,7 +3,7 @@ import json
 import base64
 
 import env_config  # noqa: F401  加载 .env
-from env_config import is_tencent_configured
+from env_config import is_tencent_configured, is_zhipu_configured, log_startup_config
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_sock import Sock
 from weather_api import fetch_weather_data, get_mock_weather_data
@@ -13,6 +13,7 @@ from location_service import get_city_from_ip, get_city_from_coords, DEFAULT_CIT
 
 app = Flask(__name__)
 sock = Sock(app)
+log_startup_config()
 
 
 def get_weather_for_city(city_name):
@@ -591,13 +592,18 @@ def create_conversation():
 
 @app.route('/api/health', methods=['GET'])
 def health():
-    from tts_service import get_voice_types
-    return jsonify({
+    payload = {
         'status': 'ok',
+        'llm_configured': is_zhipu_configured(),
         'tts_configured': is_tencent_configured(),
         'asr_configured': is_tencent_configured(),
-        'voice_types': get_voice_types(),
-    })
+    }
+    if is_tencent_configured():
+        from tts_service import get_voice_types
+        payload['voice_types'] = get_voice_types()
+    else:
+        payload['voice_types'] = {}
+    return jsonify(payload)
 
 
 if __name__ == '__main__':
@@ -608,8 +614,12 @@ if __name__ == '__main__':
     print('  支持语音输入和流式语音输出')
     print('  启动中...')
     if not is_tencent_configured():
-        print('  未检测到腾讯云密钥，语音功能不可用')
-        print('  请复制 .env.example 为 .env 并填写 TENCENT_SECRET_ID 等配置')
+        print('  未检测到腾讯云密钥，语音功能不可用（可选）')
+        print('  本地：复制 .env.example 为 .env 并填写密钥')
+        print('  Render：在 Environment 中设置 TENCENT_SECRET_ID 等变量')
+    if not is_zhipu_configured():
+        print('  未检测到 ZHIPU_API_KEY，AI 对话不可用')
+        print('  Render：在 Environment 中设置 ZHIPU_API_KEY')
     print('=' * 50)
 
     app.run(host='0.0.0.0', port=port, debug=debug, threaded=True)
