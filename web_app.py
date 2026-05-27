@@ -2,7 +2,6 @@ import os
 import sys
 import json
 import base64
-import time
 import urllib.request
 
 import env_config  # noqa: F401  加载 .env
@@ -48,7 +47,7 @@ CITY_KEYWORDS = {
 
 
 from location_service import get_city_from_ip, get_city_from_coords, DEFAULT_CITY
-from chat_handler import process_chat_message
+from chat_handler import process_chat_message, stream_chat_message
 
 
 def get_weather_for_city(city_name):
@@ -247,18 +246,18 @@ def chat_stream():
             yield ': connected\n\n'
             yield f"data: {json.dumps({'type': 'status', 'status': 'thinking'}, ensure_ascii=False)}\n\n"
 
-            reply = process_chat_message(message, city_data)
-            cm.add_message(new_conv_id, 'bot', reply)
+            reply_parts = []
+            for chunk in stream_chat_message(message, city_data):
+                reply_parts.append(chunk)
+                yield f"data: {json.dumps({'type': 'text', 'content': chunk}, ensure_ascii=False)}\n\n"
+
+            reply = ''.join(reply_parts).strip()
+            if reply:
+                cm.add_message(new_conv_id, 'bot', reply)
 
             conv = cm.get_conversation(new_conv_id)
             msg_limit = cm.check_message_limit(new_conv_id)
             token_check = cm.check_token_limit(new_conv_id)
-
-            if reply:
-                for i in range(0, len(reply), 2):
-                    chunk = reply[i:i + 2]
-                    yield f"data: {json.dumps({'type': 'text', 'content': chunk}, ensure_ascii=False)}\n\n"
-                    time.sleep(0.03)
 
             yield f"data: {json.dumps({
                 'type': 'done',
