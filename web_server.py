@@ -474,12 +474,32 @@ def run_server(port=None):
     server_address = ('', port)
     httpd = HTTPServer(server_address, partial(WeatherHandler, directory=os.path.dirname(os.path.abspath(__file__))))
     print("=" * 50)
-    print("  智能天气穿搭助手 Web版")
-    print(f"  http://localhost:{port}")
+    print("  智能天气穿搭助手 Web版 (legacy HTTP server)")
+    print(f"  http://0.0.0.0:{port}")
     print("  按 Ctrl+C 停止服务")
     print("=" * 50)
     httpd.serve_forever()
 
 
+def run_production_server():
+    """Render/Heroku 生产入口：先绑定端口，再加载 Flask 应用。"""
+    port = os.environ.get('PORT', '5000')
+    argv = [
+        sys.executable, '-m', 'gunicorn',
+        'web_app:app',
+        '--bind', f'0.0.0.0:{port}',
+        '--workers', '1',
+        '--threads', '4',
+        '--timeout', '120',
+        '--access-logfile', '-',
+        '--error-logfile', '-',
+    ]
+    print('=' * 50)
+    print('  启动生产服务 (gunicorn -> web_app)')
+    print(f'  bind 0.0.0.0:{port}')
+    print('=' * 50)
+    os.execvp(sys.executable, argv)
+
+
 if __name__ == '__main__':
-    run_server()
+    run_production_server()

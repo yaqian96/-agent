@@ -358,14 +358,18 @@ sequenceDiagram
 ### Render 部署
 
 1. Fork 本仓库
-2. 在 Render 上创建新的 Web Service（可使用 `render.yaml`）
-3. 启动命令：`gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app`
+2. 在 Render 上创建 Web Service（可使用 `render.yaml`）
+3. **Start Command**（必须与下面一致，Dashboard 会覆盖 `render.yaml`）：
+   ```bash
+   gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app
+   ```
+   若仍配置为 `python web_server.py`，代码会自动转发到 gunicorn，但建议直接改为上式。
 4. 在 Render 控制台设置环境变量（勿写入代码）：
    - `ZHIPU_API_KEY`（必需）
-   - `TENCENT_SECRET_ID`（可选，语音功能）
-   - `TENCENT_SECRET_KEY`（可选）
-   - `TENCENT_APP_ID`（可选）
-5. 本地开发如需热重载：`FLASK_DEBUG=1 python web_app.py`
+   - `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` / `TENCENT_APP_ID`（可选，语音功能）
+5. 本地开发热重载：`FLASK_DEBUG=1 python web_app.py`
+
+**常见错误 `No open ports detected`**：Start Command 仍为旧版 `python web_server.py` 且进程在 import 阶段卡住/OOM，未监听 `$PORT`。请改用上方的 gunicorn 命令后重新部署。
 
 ### 本地开发
 
