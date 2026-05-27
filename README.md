@@ -358,13 +358,14 @@ sequenceDiagram
 ### Render 部署
 
 1. Fork 本仓库
-2. 在 Render 上创建新的 Web Service
-3. 设置环境变量：
-   - `ZHIPU_API_KEY`
-   - `TENCENT_SECRET_ID`（可选）
+2. 在 Render 上创建新的 Web Service（可使用 `render.yaml`）
+3. 启动命令：`gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 web_app:app`
+4. 在 Render 控制台设置环境变量（勿写入代码）：
+   - `ZHIPU_API_KEY`（必需）
+   - `TENCENT_SECRET_ID`（可选，语音功能）
    - `TENCENT_SECRET_KEY`（可选）
    - `TENCENT_APP_ID`（可选）
-4. 部署即可
+5. 本地开发如需热重载：`FLASK_DEBUG=1 python web_app.py`
 
 ### 本地开发
 

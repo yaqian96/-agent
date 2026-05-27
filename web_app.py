@@ -625,13 +625,15 @@ def health():
 
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', '').lower() in ('1', 'true', 'yes')
     print('=' * 50)
     print('  智能天气穿搭助手 Web版')
     print('  支持语音输入和流式语音输出')
     print('  启动中...')
     if not is_tencent_configured():
-        print('  ⚠️  未检测到腾讯云密钥，语音功能不可用')
+        print('  未检测到腾讯云密钥，语音功能不可用')
         print('  请复制 .env.example 为 .env 并填写 TENCENT_SECRET_ID 等配置')
     print('=' * 50)
-    
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+
+    app.run(host='0.0.0.0', port=port, debug=debug, threaded=True)
