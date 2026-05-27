@@ -1,76 +1,126 @@
-# 智能天气穿搭助手
+# 🌤️ 智能天气穿搭助手
 
-一个基于 Python 的智能天气穿搭助手，提供天气查询、穿搭建议和聊天交互功能，支持语音输入与流式语音输出。
+基于 **RAG (Retrieval-Augmented Generation)** 的智能天气穿搭助手，结合实时天气数据与知识库检索，为用户提供个性化的穿衣建议和出行指导。
 
-## 功能特点
+---
 
-- 🌤️ **天气查询** - 获取实时天气数据和未来一周预报
-- 👔 **穿搭建议** - 根据天气情况智能推荐穿搭方案
-- 💬 **智能聊天** - 支持自然语言交互，回答天气相关问题
-- 🎤 **语音输入** - 浏览器录音 + 腾讯云 ASR 语音识别，识别后自动发送
-- 🔊 **流式语音输出** - 文字回复流式显示，TTS 按句合成并逐段播放
-- 📍 **自动定位** - 浏览器 GPS + IP 定位，自动获取城市天气
-- 📊 **数据分析** - 温度趋势分析和舒适度评估
-- ☀️ **紫外线提醒** - 提供紫外线强度建议
-- ☔ **降雨预报** - 提醒是否需要带伞
+## ✨ 功能特点
 
-## 技术栈
+### 🎯 核心功能
+- **天气查询** - 获取实时天气数据和未来一周预报
+- **穿搭建议** - 根据气温、湿度、风力智能推荐穿搭方案
+- **智能聊天** - 支持自然语言交互，回答天气相关问题
+- **数据分析** - 温度趋势分析和舒适度评估
 
-- **后端**: Python 3.10+
-- **Web框架**: Flask + Flask-Sock (WebSocket)
-- **语音识别**: 腾讯云 ASR（一句话识别）
-- **语音合成**: 腾讯云 TTS（流式按句播放）
-- **大模型**: 智谱AI GLM-4-Flash
-- **LangChain**: 用于工具调用和 RAG 系统
-- **天气API**: Open-Meteo
-- **前端**: HTML5 + CSS3 + JavaScript (MediaRecorder / Web Audio API)
+### 🔊 语音交互
+- **语音输入** - 浏览器录音 + 腾讯云 ASR 语音识别
+- **流式语音输出** - 文字回复流式显示，TTS 按句合成并逐段播放
 
-## 项目结构
+### 🌍 定位服务
+- **自动定位** - 浏览器 GPS + IP 定位，自动获取城市天气
+- **手动选择** - 支持 20+ 热门城市手动选择
+
+### ☀️ 健康提醒
+- **紫外线提醒** - 提供紫外线强度建议
+- **降雨预报** - 提醒是否需要带伞
+
+---
+
+## 🛠️ 技术栈
+
+### 后端
+| 技术 | 版本 | 用途 |
+|------|------|------|
+| Python | 3.10+ | 开发语言 |
+| Flask | 2.0+ | Web 框架 |
+| Flask-Sock | 0.6+ | WebSocket 支持 |
+| LangChain | 0.1+ | RAG 与 LLM 编排 |
+| ChromaDB | 0.4+ | 向量数据库 |
+| Sentence Transformers | 2.2+ | 文本向量化 |
+
+### 人工智能
+| 服务 | 说明 |
+|------|------|
+| 智谱 AI GLM-4-Flash | 大语言模型 |
+| 腾讯云 ASR | 语音识别 |
+| 腾讯云 TTS | 语音合成 |
+
+### 数据来源
+| 服务 | 说明 |
+|------|------|
+| Open-Meteo | 天气数据 API |
+| 和风天气 API | 备用天气数据源 |
+
+### 前端
+- HTML5 + CSS3 + JavaScript
+- MediaRecorder API（录音）
+- Web Audio API（音频播放）
+
+---
+
+## 📁 项目结构
 
 ```
 weather_outfit_agent/
-├── templates/              # 前端模板
-│   └── index.html          # 主页面
-├── knowledge_base/         # RAG 知识库
-│   ├── outfit_guide.md     # 穿搭指南
-│   ├── travel_guide.md     # 旅行指南
-│   └── weather_health.md   # 天气健康知识
-├── web_app.py              # Flask 主服务（推荐）
-├── web_server.py           # 简易 HTTP 服务
-├── asr_service.py          # 语音识别服务
-├── tts_service.py          # 语音合成服务
-├── streaming_tts.py        # 流式 TTS 服务
-├── conversation_manager.py # 对话历史管理
-├── langchain_agent.py      # LangChain Agent
-├── simple_rag_system.py    # RAG 检索系统
-├── requirements.txt        # 依赖列表
-├── Procfile                # 部署配置
-└── render.yaml             # Render 部署配置
+├── templates/                 # 前端模板
+│   └── index.html             # 主页面（支持语音交互）
+├── knowledge_base/            # RAG 知识库
+│   ├── outfit_guide.md        # 四季穿搭指南
+│   ├── travel_guide.md        # 旅游攻略
+│   └── weather_health.md      # 天气与健康知识
+├── chroma_db/                 # ChromaDB 向量存储目录
+├── web_app.py                 # Flask 主服务（推荐）
+├── web_server.py              # 简易 HTTP 服务
+├── rag_system.py              # 完整 RAG 系统（基于 ChromaDB）
+├── simple_rag_system.py       # 简化版 RAG（关键词匹配）
+├── chat_chains.py             # LangChain 对话链
+├── chat_common.py             # 聊天公共模块
+├── chat_handler.py            # 聊天处理器
+├── langchain_agent.py         # LangChain Agent
+├── weather_api.py             # 天气数据 API
+├── weather_prompt.py          # Prompt 模板配置
+├── asr_service.py             # 语音识别服务
+├── tts_service.py             # 语音合成服务
+├── streaming_tts.py           # 流式 TTS 服务
+├── conversation_manager.py    # 对话历史管理
+├── location_service.py        # 定位服务
+├── outfit_recommender.py      # 穿搭推荐逻辑
+├── analyzer.py                # 数据分析模块
+├── visualizer.py              # 可视化模块
+├── config.py                  # 配置文件
+├── env_config.py              # 环境变量配置
+├── requirements.txt           # 依赖列表
+└── render.yaml                # Render 部署配置
 ```
 
-## 快速开始
+---
+
+## 🚀 快速开始
 
 ### 环境要求
-
 - Python 3.10+
 - pip 包管理器
 
 ### 安装依赖
 
 ```bash
+cd weather_outfit_agent
 pip install -r requirements.txt
 ```
 
 ### 设置环境变量
 
 ```bash
-# 智谱 AI API Key
+# 智谱 AI API Key（必需）
 export ZHIPU_API_KEY=your_api_key_here
 
-# 腾讯云语音服务（语音识别 / 语音合成）
+# 腾讯云语音服务（可选，语音功能需要）
 export TENCENT_SECRET_ID=your_secret_id
 export TENCENT_SECRET_KEY=your_secret_key
 export TENCENT_APP_ID=your_app_id
+
+# 和风天气 API（可选，备用数据源）
+export API_KEY=your_hefeng_key
 ```
 
 ### 运行服务
@@ -81,124 +131,44 @@ python web_app.py
 
 服务启动后访问: http://localhost:5000
 
-## 语音识别功能说明
+---
 
-整体流程为：**浏览器录音 → 前端转 PCM → 后端调用腾讯云 ASR → 识别完成后自动发送对话**。
+## 🧠 RAG 系统架构
 
-### 1. 前端录音（`templates/index.html`）
+### 知识库结构
 
-| 步骤 | 实现 |
-|------|------|
-| 触发 | 点击 🎤 按钮，调用 `toggleRecording()` |
-| 采集 | `navigator.mediaDevices.getUserMedia({ audio: true })` 获取麦克风 |
-| 录制 | 使用 `MediaRecorder`，优先 `audio/webm;codecs=opus`，每 250ms 收集一段数据 |
-| 停止 | 再次点击按钮，停止录制并调用 `uploadAndRecognize()` |
+| 文件 | 内容 | 用途 |
+|------|------|------|
+| `outfit_guide.md` | 四季穿搭指南、材质选择、颜色搭配 | 穿搭建议 |
+| `weather_health.md` | 健康提示、防晒措施、空气质量 | 健康提醒 |
+| `travel_guide.md` | 旅游攻略、景点推荐、美食介绍 | 出行建议 |
 
-录音过程中按钮变红，顶部显示「正在录音...」提示。
-
-### 2. 音频格式转换（前端）
-
-浏览器录出来的是 **WebM/Opus**，腾讯云 ASR 需要 **16kHz、16bit、单声道 PCM**，因此在浏览器内完成转换：
+### RAG 工作流程
 
 ```
-WebM Blob
-  → AudioContext.decodeAudioData() 解码
-  → OfflineAudioContext 重采样到 16000Hz
-  → Float32 转 Int16（s16le）
-  → 生成 PCM Blob
+用户查询 + 天气上下文
+        ↓
+  增强查询构建
+        ↓
+ChromaDB 向量检索 (k=3)
+        ↓
+  检索结果格式化
+        ↓
+  Prompt 模板构建
+        ↓
+  GLM-4-Flash 生成回答
 ```
 
-对应函数：`convertTo16kPcm()`
+### 文档处理配置
 
-在前端处理采样率，可避免浏览器原生采样率（44100/48000 Hz）与 ASR 要求的 16000 Hz 不一致导致识别错误，且不依赖服务端安装 ffmpeg。
+- **Chunk 大小**: 500 字符
+- **Chunk 重叠**: 50 字符
+- **分隔符**: `\n\n`, `\n`, `。`, `！`, `？`, `；`, `，`
+- **Embedding 模型**: `shibing624/text2vec-base-chinese`
 
-### 3. 上传与识别请求
+---
 
-转换完成后，通过 `FormData` 上传到 **`POST /api/asr`**：
-
-- `file`：PCM 音频文件
-- `format`：`pcm`
-
-识别期间输入框显示「正在识别语音...」，并禁用麦克风按钮。
-
-### 4. 后端 API（`web_app.py`）
-
-**主接口：`POST /api/asr`（当前使用）**
-
-```
-接收 multipart 音频
-  → recognize_speech(audio_data, format)
-  → 返回 JSON：{ success, text, request_id }
-```
-
-**备用接口：`POST /api/asr/stream`**
-
-- SSE 流式返回识别文字（逐字推送）
-- 当前前端主流程走一次性 JSON 接口
-
-### 5. 识别服务（`asr_service.py`）
-
-核心类为 `ASRService`，调用 **腾讯云一句话识别 API**：
-
-```
-ASRService.recognize()
-  ├─ 校验音频长度（< 100 字节则失败）
-  ├─ _prepare_pcm_audio()  # pcm 直接用；其他格式可用 ffmpeg 转
-  └─ _recognize_with_tencent()
-       ├─ SentenceRecognitionRequest
-       │    · EngSerViceType = "16k_zh"   # 中文 16k
-       │    · VoiceFormat = "pcm"
-       │    · Data = base64(pcm)
-       └─ 返回 resp.Result（识别文本）
-```
-
-认证信息来自环境变量：
-
-- `TENCENT_SECRET_ID`
-- `TENCENT_SECRET_KEY`
-- `TENCENT_APP_ID`
-
-### 6. 识别完成后的行为
-
-识别成功后，前端直接调用：
-
-```javascript
-await sendChatStream(data.text.trim());
-```
-
-即：**不填入输入框、不弹确认框**，直接把识别文字当作用户消息发送，后续走对话的 **文字流式回复 + 语音流式播报**。
-
-### 语音识别流程图
-
-```mermaid
-sequenceDiagram
-    participant User as 用户
-    participant Browser as 浏览器
-    participant Flask as web_app.py
-    participant ASR as asr_service.py
-    participant Tencent as 腾讯云 ASR
-
-    User->>Browser: 点击 🎤 录音
-    Browser->>Browser: MediaRecorder 录制 WebM
-    User->>Browser: 再次点击停止
-    Browser->>Browser: convertTo16kPcm()
-    Browser->>Flask: POST /api/asr (PCM)
-    Flask->>ASR: recognize_speech()
-    ASR->>Tencent: SentenceRecognition (16k_zh)
-    Tencent-->>ASR: 识别文本
-    ASR-->>Flask: { success, text }
-    Flask-->>Browser: JSON 响应
-    Browser->>Browser: sendChatStream(text) 自动发送
-```
-
-### 设计要点
-
-1. **采样率在浏览器处理**：避免采样率不匹配导致识别错误。
-2. **一次性识别、一次性发送**：输入端不做流式展示，识别完直接发消息。
-3. **无 fallback 随机文本**：识别失败返回真实错误，不伪造结果。
-4. **腾讯云一句话识别**：适合短语音（单次录音），不是实时边说边识别的 WebSocket 流式 ASR。
-
-## API 接口
+## 🔌 API 接口
 
 ### 1. 获取天气数据
 
@@ -211,8 +181,29 @@ GET /api/weather?city=<城市名>
 curl "http://localhost:5000/api/weather?city=成都"
 ```
 
+**响应示例**:
+```json
+{
+  "city": "成都",
+  "current": {
+    "temp": "29",
+    "condition": "多云",
+    "humidity": "65",
+    "wind": "东北风 2级"
+  },
+  "forecast": [...],
+  "outfit": {
+    "top": "短袖T恤",
+    "bottom": "薄长裤",
+    "shoes": "帆布鞋",
+    "accessory": "太阳镜"
+  }
+}
+```
+
 ### 2. 聊天交互
 
+**普通聊天**:
 ```
 POST /api/chat
 Content-Type: application/json
@@ -227,6 +218,11 @@ Content-Type: application/json
 ```
 POST /api/chat/stream
 Content-Type: application/json
+
+{
+    "message": "今天穿什么？",
+    "cityData": {...}
+}
 ```
 
 ### 3. 语音识别
@@ -235,7 +231,7 @@ Content-Type: application/json
 POST /api/asr
 Content-Type: multipart/form-data
 
-file: recording.pcm
+file: recording.pcm (16kHz, 16bit, 单声道)
 format: pcm
 ```
 
@@ -252,39 +248,95 @@ Content-Type: application/json
 }
 ```
 
-### 5. 定位
+### 5. 定位服务
 
 ```
 GET /api/locate
 GET /api/locate?lat=<纬度>&lon=<经度>
 ```
 
-**示例**:
-```bash
-curl "http://localhost:5000/api/locate"
-curl "http://localhost:5000/api/locate?lat=30.57&lon=104.06"
+---
+
+## 🗣️ 语音交互流程
+
+### 语音识别流程
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Browser as 浏览器
+    participant Flask as web_app.py
+    participant ASR as asr_service.py
+    participant Tencent as 腾讯云 ASR
+
+    User->>Browser: 点击 🎤 录音
+    Browser->>Browser: MediaRecorder 录制 WebM
+    User->>Browser: 再次点击停止
+    Browser->>Browser: convertTo16kPcm() 转换采样率
+    Browser->>Flask: POST /api/asr (PCM)
+    Flask->>ASR: recognize_speech()
+    ASR->>Tencent: SentenceRecognition (16k_zh)
+    Tencent-->>ASR: 识别文本
+    ASR-->>Flask: { success, text }
+    Flask-->>Browser: JSON 响应
+    Browser->>Browser: sendChatStream(text) 自动发送
 ```
 
-## 支持的城市
+### 语音合成流程
 
-- 北京、上海、广州、深圳
-- 杭州、成都、武汉、西安
-- 重庆、南京、天津、苏州
-- 郑州、长沙、青岛、沈阳
-- 大连、厦门、宁波、昆明
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Browser as 浏览器
+    participant Flask as web_app.py
+    participant TTS as tts_service.py
+    participant Tencent as 腾讯云 TTS
 
-## 功能示例
+    User->>Browser: 发送消息
+    Browser->>Flask: POST /api/chat/stream
+    Flask->>Flask: 调用 RAG + LLM
+    Flask-->>Browser: SSE 流式文本响应
+    loop 每段文字
+        Browser->>Flask: POST /api/tts/stream
+        Flask->>TTS: synthesize_stream()
+        TTS->>Tencent: TTS 请求
+        Tencent-->>TTS: 音频流
+        TTS-->>Flask: 音频流
+        Flask-->>Browser: SSE 音频数据
+        Browser->>Browser: Web Audio API 播放
+    end
+```
+
+---
+
+## 🌆 支持的城市
+
+- **一线城市**: 北京、上海、广州、深圳
+- **新一线城市**: 杭州、成都、武汉、西安、重庆、南京、天津、苏州
+- **热门城市**: 郑州、长沙、青岛、沈阳、大连、厦门、宁波、昆明
+
+---
+
+## 📝 使用示例
 
 ### 天气查询
 ```
 用户: 成都天气怎么样？
-助手: 📅 成都今日天气：多云 29°C...
+助手: 📅 成都今日天气：多云 29°C
+      湿度：65%，风力：东北风 2级
+      未来几天预报：
+      - 05/28: 晴 22~33°C
+      - 05/29: 多云 23~31°C
 ```
 
 ### 穿搭建议
 ```
 用户: 今天穿什么？
-助手: 👔 成都今日穿搭建议：短袖T恤...
+助手: 👔 成都今日穿搭建议：
+      上衣：短袖T恤
+      下装：薄长裤
+      鞋子：帆布鞋
+      配饰：太阳镜
 ```
 
 ### 语音输入
@@ -293,31 +345,81 @@ curl "http://localhost:5000/api/locate?lat=30.57&lon=104.06"
 系统: 识别完成后自动发送，并流式返回文字与语音
 ```
 
-### 未来预报
-```
-用户: 明天天气怎么样？
-助手: 📅 明天成都天气：晴，温度22~33°C...
-```
-
 ### 紫外线提醒
 ```
 用户: 今天紫外线强吗？
 助手: 紫外线强度较高!建议涂抹防晒霜、戴遮阳帽 🧴🕶️
 ```
 
-## 部署
+---
+
+## 🚢 部署
 
 ### Render 部署
 
 1. Fork 本仓库
 2. 在 Render 上创建新的 Web Service
-3. 设置环境变量 `ZHIPU_API_KEY`、`TENCENT_SECRET_ID`、`TENCENT_SECRET_KEY`、`TENCENT_APP_ID`
+3. 设置环境变量：
+   - `ZHIPU_API_KEY`
+   - `TENCENT_SECRET_ID`（可选）
+   - `TENCENT_SECRET_KEY`（可选）
+   - `TENCENT_APP_ID`（可选）
 4. 部署即可
 
-## 许可证
+### 本地开发
+
+```bash
+# 安装依赖
+pip install -r requirements.txt
+
+# 设置环境变量
+export ZHIPU_API_KEY=your_key
+
+# 运行服务
+python web_app.py
+
+# 访问
+open http://localhost:5000
+```
+
+---
+
+## 📊 项目配置
+
+### RAG 配置
+
+在 `rag_system.py` 中可调整：
+- `chunk_size`: 文档分块大小（默认 500）
+- `chunk_overlap`: 块重叠大小（默认 50）
+- `k`: 检索结果数量（默认 3）
+
+### LLM 配置
+
+在 `chat_common.py` 中可调整：
+- `model`: 模型名称（默认 `glm-4-flash`）
+- `temperature`: 温度参数（默认 0.7）
+- `max_tokens`: 最大输出长度（默认 800）
+
+---
+
+## 📜 许可证
 
 MIT License
 
-## 贡献
+---
+
+## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
+
+---
+
+## 📧 联系方式
+
+如有问题或建议，请通过以下方式联系：
+- 提交 Issue
+- 发送邮件
+
+---
+
+**更新时间**: 2026年5月

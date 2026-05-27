@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Sequence, Tuple, Union
 
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 
+from langchain_core.runnables import RunnableLambda
+
 PromptLike = Union[PromptTemplate, FewShotPromptTemplate]
 
 
@@ -196,3 +198,12 @@ def build_weather_user_prompt(
         rag_context=rag_context,
         question=message,
     )
+
+
+WEATHER_USER_PROMPT_RUNNABLE = RunnableLambda(
+    lambda x: build_weather_user_prompt(
+        x['message'],
+        x['weather_context'],
+        x['rag_context'],
+    )
+)
